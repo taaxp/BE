@@ -8,6 +8,8 @@ struct TodayView: View {
     @AppStorage(HomeLayout.key) private var layoutRaw = HomeLayout.encode(HomeWidget.defaultOrder)
     @State private var editing = false
     @State private var selected: MetricKind?
+    @State private var askOpen = false
+    @State private var askWith: String?
 
     private var widgets: [HomeWidget] { HomeLayout.decode(layoutRaw) }
 
@@ -15,6 +17,8 @@ struct TodayView: View {
         NavigationStack {
             ScrollView {
                 VStack(spacing: Theme.gridSpacing) {
+                    GreetingCard()
+                    AskCoachCard(openWith: $askWith, isOpen: $askOpen)
                     ForEach(Array(HomeLayout.rows(widgets).enumerated()), id: \.offset) { _, row in
                         HStack(spacing: Theme.gridSpacing) {
                             ForEach(row) { w in
@@ -33,7 +37,7 @@ struct TodayView: View {
             }
             .background(Color(.systemGroupedBackground))
             .navigationTitle(Date.now.formatted(.dateTime.weekday(.wide).day().month(.wide)))
-            .navigationBarTitleDisplayMode(.large)
+            .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button("Edit") { editing = true }
@@ -41,6 +45,7 @@ struct TodayView: View {
             }
             .refreshable { await model.refreshAll() }
             .sheet(isPresented: $editing) { EditHomeView(layoutRaw: $layoutRaw) }
+            .sheet(isPresented: $askOpen) { AskCoachView(initialQuestion: askWith) }
             .navigationDestination(item: $selected) { MetricDetailView(metric: $0) }
         }
     }

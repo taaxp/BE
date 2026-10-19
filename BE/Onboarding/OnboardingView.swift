@@ -11,6 +11,7 @@ struct OnboardingView: View {
     @State private var plan: Plan?
     @State private var overview: String?
     @State private var error: String?
+    @State private var name = ""
 
     enum Step: Int, CaseIterable { case welcome, devices, permission, importing, overview, plan }
 
@@ -42,7 +43,12 @@ struct OnboardingView: View {
         page(symbol: "heart.circle.fill", tint: .pink, title: "BE",
              text: "All your essential health data in one calm place, with a coach that explains it.") {
             VStack(alignment: .leading, spacing: 14) {
-                bullet("person.crop.circle.badge.xmark", "No account, no sign-up.")
+                TextField("Your first name (optional)", text: $name)
+                    .textContentType(.givenName)
+                    .font(.title3)
+                    .padding(14)
+                    .background(Color(.secondarySystemGroupedBackground), in: .rect(cornerRadius: 14, style: .continuous))
+                bullet("person.crop.circle.badge.xmark", "No account, no sign-up. Your name stays on this iPhone.")
                 bullet("heart.text.square", "Your data stays in Apple Health and on this iPhone.")
                 bullet("sparkles", "Coaching runs on device with Apple Intelligence where available.")
             }
@@ -157,7 +163,7 @@ struct OnboardingView: View {
         .background(Color(.systemGroupedBackground))
         .safeAreaInset(edge: .bottom) {
             primary("Start") {
-                Task { await model.completeOnboarding(plan: plan ?? .starter(on: model.day)) }
+                Task { await model.completeOnboarding(plan: plan ?? .starter(on: model.day), name: name) }
             }
         }
     }

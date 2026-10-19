@@ -275,3 +275,41 @@ import Testing
         #expect(PlanRecommender.clamp(PlanTarget(metric: .hrv, value: 50)) == nil)
     }
 }
+
+@Suite struct GreetingTests {
+    let today = Day(year: 2026, month: 10, day: 19)
+
+    func inputs(sleep: Double, rhr: Double, hrv: Double) -> Greeting.Inputs {
+        Greeting.Inputs(
+            values: [.sleepHours: sleep, .restingHeartRate: rhr, .hrv: hrv, .steps: 6420, .exerciseMinutes: 18, .water: 1.25],
+            baselines: [.restingHeartRate: Baseline(mean: 58, standardDeviation: 3, sampleCount: 60),
+                        .hrv: Baseline(mean: 46, standardDeviation: 3, sampleCount: 60)],
+            plan: Plan(targets: [PlanTarget(metric: .sleepHours, value: 7.5), PlanTarget(metric: .steps, value: 8500),
+                                 PlanTarget(metric: .exerciseMinutes, value: 30), PlanTarget(metric: .water, value: 2.5)], createdOn: today))
+    }
+
+    @Test func poorRecoveryMeansEasyDay() {
+        let g = Greeting.make(inputs(sleep: 6.2, rhr: 63, hrv: 41), hour: 8, name: "Sam")
+        #expect(g.hello == "Good morning, Sam")
+        #expect(g.line == "easy does it today")
+        #expect(g.reason.hasPrefix("A short night, resting heart rate up 5 bpm and HRV below your usual."))
+        #expect((60...75).contains(g.score))
+    }
+
+    @Test func recoveredDay() {
+        let g = Greeting.make(inputs(sleep: 7.8, rhr: 57, hrv: 48), hour: 19, name: nil)
+        #expect(g.hello == "Good evening")
+        #expect(g.line == "you're ready to go")
+    }
+
+    @Test func oldStateWithoutNewFieldsStillDecodes() throws {
+        var state = BEState(today: today)
+        state.firstName = "Sam"
+        var json = try JSONSerialization.jsonObject(with: JSONEncoder().encode(state)) as! [String: Any]
+        json.removeValue(forKey: "firstName")
+        json.removeValue(forKey: "cloudCoachConsentValue")
+        let back = try JSONDecoder().decode(BEState.self, from: JSONSerialization.data(withJSONObject: json))
+        #expect(back.firstName == nil)
+        #expect(back.cloudCoachConsent == false)
+    }
+}

@@ -86,6 +86,12 @@ enum HealthTypes {
         set.insert(HKCategoryType(.highHeartRateEvent))
         set.insert(HKCategoryType(.lowHeartRateEvent))
         set.insert(HKCategoryType(.irregularHeartRhythmEvent))
+        // Profile, set by the person in the Health app.
+        set.insert(HKCharacteristicType(.dateOfBirth))
+        set.insert(HKCharacteristicType(.biologicalSex))
+        set.insert(HKCharacteristicType(.bloodType))
+        set.insert(HKCharacteristicType(.wheelchairUse))
+        set.insert(HKQuantityType(.height))
         return set
     }
 

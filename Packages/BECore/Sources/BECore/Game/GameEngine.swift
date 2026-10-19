@@ -25,6 +25,17 @@ public struct BEState: Codable, Sendable {
     public var cloudAIConsent: Bool
     /// Badge ids already celebrated.
     public var earnedBadges: Set<String>
+    /// What BE calls you. Asked once at onboarding and kept on this device only:
+    /// Apple Health doesn't share names with apps, and BE has no account.
+    public var firstName: String?
+    /// Consent to send questions and an aggregated health summary to ChatGPT
+    /// (through the BE relay) when Apple Intelligence isn't available. Off by default.
+    /// Stored as optional so older saved state still decodes.
+    private var cloudCoachConsentValue: Bool?
+    public var cloudCoachConsent: Bool {
+        get { cloudCoachConsentValue ?? false }
+        set { cloudCoachConsentValue = newValue }
+    }
 
     public init(today: Day) {
         plan = .starter(on: today)

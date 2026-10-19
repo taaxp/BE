@@ -20,6 +20,7 @@ final class AppModel {
     private(set) var history: [MetricKind: [DailyValue]] = [:]
     private(set) var rings: Rings?
     private(set) var lastSync: Date?
+    private(set) var profile: ProfileSummary?
     private(set) var isLoading = false
 
     // Game and plan
@@ -31,6 +32,7 @@ final class AppModel {
     // Coach
     private(set) var aiNotes: [MetricKind: CoachNote] = [:]
     let coach = CoachService()
+    let chat = CoachChat()
 
     let health = HealthStore()
     private var refreshTask: Task<Void, Never>?
@@ -67,6 +69,7 @@ final class AppModel {
             for await (m, values) in group { apply(m, values) }
         }
         rings = try? await health.rings()
+        profile = await health.profile()
         afterHealthChange()
     }
 
@@ -147,8 +150,9 @@ final class AppModel {
         afterHealthChange()
     }
 
-    func completeOnboarding(plan: Plan) async {
+    func completeOnboarding(plan: Plan, name: String?) async {
         state.plan = plan
+        setName(name)
         state.onboardingComplete = true
         StateStore.save(state)
         await start()
@@ -161,6 +165,27 @@ final class AppModel {
         state = BEState(today: day)
         aiNotes = [:]
         celebrations = []
+    }
+
+    func setName(_ name: String?) {
+        let trimmed = name?.trimmingCharacters(in: .whitespacesAndNewlines).prefix(30)
+        state.firstName = (trimmed?.isEmpty ?? true) ? nil : String(trimmed!)
+        StateStore.save(state)
+    }
+
+    func setCloudCoachConsent(_ granted: Bool) {
+        state.cloudCoachConsent = granted
+        StateStore.save(state)
+    }
+
+    /// The personal greeting and BE score at the top of Home.
+    var greeting: Greeting {
+        var baselines: [MetricKind: Baseline] = [:]
+        for m in [MetricKind.restingHeartRate, .hrv] {
+            if let b = MetricsEngine.baseline(history[m] ?? [], today: day) { baselines[m] = b }
+        }
+        return Greeting.make(.init(values: today, baselines: baselines, plan: state.plan, questDone: !questsDone.isEmpty),
+                             hour: Calendar.current.component(.hour, from: Date()), name: state.firstName)
     }
 
     func setCloudAIConsent(_ granted: Bool) {
@@ -236,7 +261,7 @@ final class AppModel {
 
     var summary: HealthSummary {
         HealthSummary.build(today: day, history: history, todayValues: today, plan: state.plan,
-                            streak: state.streak(today: day).current)
+                            streak: state.streak(today: day).current, profile: profile)
     }
 
     // MARK: Publishing to widgets and watch

@@ -121,6 +121,41 @@ final class HealthStore: @unchecked Sendable {
             standGoal: s.standHoursGoal?.doubleValue(for: .count()) ?? 12)
     }
 
+    // MARK: Profile
+
+    /// Age, sex, blood type, wheelchair use, height and weight as set in the
+    /// Health app. Each field is nil when not set or not shared with BE.
+    func profile() async -> ProfileSummary {
+        var p = ProfileSummary()
+        if let dob = try? store.dateOfBirthComponents(), let date = calendar.date(from: dob) {
+            p.age = calendar.dateComponents([.year], from: date, to: Date()).year
+        }
+        if let sex = try? store.biologicalSex().biologicalSex {
+            switch sex {
+            case .female: p.biologicalSex = "female"
+            case .male: p.biologicalSex = "male"
+            case .other: p.biologicalSex = "other"
+            default: break
+            }
+        }
+        if let bt = try? store.bloodType().bloodType {
+            let names: [HKBloodType: String] = [.aPositive: "A+", .aNegative: "A−", .bPositive: "B+", .bNegative: "B−",
+                                                .abPositive: "AB+", .abNegative: "AB−", .oPositive: "O+", .oNegative: "O−"]
+            p.bloodType = names[bt]
+        }
+        if let wc = try? store.wheelchairUse().wheelchairUse, wc != .notSet { p.wheelchairUse = wc == .yes }
+        p.heightCm = try? await latest(.height, unit: .meterUnit(with: .centi))
+        p.weightKg = try? await latest(.bodyMass, unit: .gramUnit(with: .kilo))
+        return p
+    }
+
+    private func latest(_ id: HKQuantityTypeIdentifier, unit: HKUnit) async throws -> Double? {
+        let descriptor = HKSampleQueryDescriptor(
+            predicates: [.quantitySample(type: HKQuantityType(id), predicate: nil)],
+            sortDescriptors: [SortDescriptor(\.endDate, order: .reverse)], limit: 1)
+        return try await descriptor.result(for: store).first?.quantity.doubleValue(for: unit)
+    }
+
     // MARK: Sources
 
     /// Which devices have written steps or heart rate in the last week.

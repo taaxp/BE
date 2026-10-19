@@ -14,6 +14,13 @@ First build increment. The core logic is compiled and unit-tested (29 tests, Swi
 | Watch app (today view, water logging through the phone) | Written, not yet compiled |
 | BE relay (stateless server holding the OpenAI key, App Attest) | **Not built.** The app's client is ready; until it's deployed, photo estimates show a "not set up" message and manual entry works |
 
+## Added since the first increment
+
+- **Name and greeting:** the first name is asked at onboarding (optional, stored on the device only). Home opens with "Good morning, <name>", a line based on today's vitals, and a BE score (0–100: 55% recovery, 45% activity). The logic is in `BECore/Coach/Greeting.swift`, with tests.
+- **Profile from Apple Health:** age, biological sex, blood type, wheelchair use, height and weight (`HealthStore.profile()`). These are included in the AI summary but never the name.
+- **Ask coach** (`BE/AI/CoachChat.swift`, `BE/Today/AskCoachView.swift`): chat and "Prepare my insights". Apple Intelligence on device first; ChatGPT through the BE relay only with separate consent (`cloudCoachConsent`); otherwise the rule-based coach. The relay endpoints `/v1/coach-chat` and `/v1/coach-insights` are not built yet.
+- **Preview only, so far:** a meal photo diary calendar, progress photos, a draining water glass, a live ECG heart card, soft rings, and a full sleep card with stages and a sleep score. These still need porting to SwiftUI.
+
 ## Build
 
 On a Mac with Xcode 26 or later:

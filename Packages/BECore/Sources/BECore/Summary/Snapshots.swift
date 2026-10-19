@@ -54,15 +54,18 @@ public struct HealthSummary: Codable, Hashable, Sendable {
     public let date: String
     public let metrics: [MetricLine]
     public let streak: Int
+    /// Profile fields from Apple Health, when the person has set them. Never the name.
+    public let profile: ProfileSummary?
 
-    public init(date: Day, metrics: [MetricLine], streak: Int) {
+    public init(date: Day, metrics: [MetricLine], streak: Int, profile: ProfileSummary? = nil) {
         self.date = date.description
         self.metrics = metrics
         self.streak = streak
+        self.profile = profile
     }
 
     public static func build(today: Day, history: [MetricKind: [DailyValue]], todayValues: [MetricKind: Double],
-                             plan: Plan, streak: Int) -> HealthSummary {
+                             plan: Plan, streak: Int, profile: ProfileSummary? = nil) -> HealthSummary {
         let lines = MetricKind.allCases.compactMap { m -> MetricLine? in
             let h = history[m] ?? []
             let t = todayValues[m]
@@ -75,7 +78,27 @@ public struct HealthSummary: Codable, Hashable, Sendable {
                 trend: MetricsEngine.trend(h, today: today),
                 target: plan.target(for: m)?.value)
         }
-        return HealthSummary(date: today, metrics: lines, streak: streak)
+        return HealthSummary(date: today, metrics: lines, streak: streak, profile: profile)
+    }
+}
+
+/// HealthKit characteristics and body measurements, as the Health app holds them.
+public struct ProfileSummary: Codable, Hashable, Sendable {
+    public var age: Int?
+    public var biologicalSex: String?
+    public var bloodType: String?
+    public var heightCm: Double?
+    public var weightKg: Double?
+    public var wheelchairUse: Bool?
+
+    public init(age: Int? = nil, biologicalSex: String? = nil, bloodType: String? = nil,
+                heightCm: Double? = nil, weightKg: Double? = nil, wheelchairUse: Bool? = nil) {
+        self.age = age
+        self.biologicalSex = biologicalSex
+        self.bloodType = bloodType
+        self.heightCm = heightCm
+        self.weightKg = weightKg
+        self.wheelchairUse = wheelchairUse
     }
 }
 

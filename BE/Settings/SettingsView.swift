@@ -18,6 +18,19 @@ struct SettingsView: View {
                         set: { model.setCloudAIConsent($0) }))
                     Text("Sends meal photos, and nothing else, to OpenAI through BE's relay. Processed in the United States.")
                         .font(.footnote).foregroundStyle(.secondary)
+                    Toggle("Coach chat with ChatGPT", isOn: Binding(
+                        get: { model.state.cloudCoachConsent },
+                        set: { model.setCloudCoachConsent($0) }))
+                    Text("Used only when Apple Intelligence isn't available. Sends your questions and a summary of your numbers (no name) to OpenAI through BE's relay, in the United States.")
+                        .font(.footnote).foregroundStyle(.secondary)
+                }
+
+                Section("You") {
+                    TextField("First name", text: Binding(
+                        get: { model.state.firstName ?? "" },
+                        set: { model.setName($0) }))
+                        .textContentType(.givenName)
+                    Text("Kept on this iPhone only.").font(.footnote).foregroundStyle(.secondary)
                 }
 
                 Section("Apple Health") {

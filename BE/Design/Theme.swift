@@ -29,6 +29,9 @@ enum Theme {
         }
     }
 
+    /// BE brand red, from the app icon.
+    static let brand = Color(red: 0.96, green: 0.05, blue: 0.27)
+
     static let move = Color(red: 0.98, green: 0.07, blue: 0.31)
     static let exercise = Color(red: 0.65, green: 1.0, blue: 0.0)
     static let stand = Color(red: 0.0, green: 0.93, blue: 0.95)

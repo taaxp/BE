@@ -24,6 +24,8 @@
   --hrv: #F50C45; --o2: #12A9B8; --vo2: #2DB45A; --weight: #8C4FD9; --ex: #2DB45A;
   --good: #1F9D4C; --warn: #E06A00;
   --move: #FA114F; --exer: #7ED400; --stand: #00C8D7;
+  --r-move: #F07A8A; --r-move-2: #F9B4A8; --r-exer: #5DBE9A; --r-exer-2: #A8E3C6; --r-stand: #6FA8E8; --r-stand-2: #B4D4F7;
+  --s-awake: #F2A08C; --s-rem: #6FC3EC; --s-core: #6E8BEA; --s-deep: #5844C2;
   --frame: #1B1A1D;
   --font: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", system-ui, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   --r: 26px;
@@ -37,7 +39,7 @@
     --hatch: rgba(247, 242, 243, 0.32); --track: rgba(247, 242, 243, 0.12);
     --pill: #1E1A1F; --pill-fg: #F7F2F3; --pill-dim: rgba(247, 242, 243, 0.5);
     --brand: #FF2A5C; --brand-2: #FF6D88; --good: #3DD26B; --warn: #FF9A3D; --exer: #A6FF00;
-    --frame: #2B282C; color-scheme: dark;
+    --frame: #2B282C; --r-move: #FF8C9A; --r-move-2: #FFB9AE; --r-exer: #6FD3AC; --r-exer-2: #B0EED3; --r-stand: #84B8F2; --r-stand-2: #BCDCFA; --s-awake: #F7AE9B; --s-rem: #7FD0F5; --s-core: #8AA2F5; --s-deep: #7A68E0; color-scheme: dark;
   }
 }
 :root[data-theme="dark"] {
@@ -46,7 +48,7 @@
   --hatch: rgba(247, 242, 243, 0.32); --track: rgba(247, 242, 243, 0.12);
   --pill: #1E1A1F; --pill-fg: #F7F2F3; --pill-dim: rgba(247, 242, 243, 0.5);
   --brand: #FF2A5C; --brand-2: #FF6D88; --good: #3DD26B; --warn: #FF9A3D; --exer: #A6FF00;
-  --frame: #2B282C; color-scheme: dark;
+  --frame: #2B282C; --r-move: #FF8C9A; --r-move-2: #FFB9AE; --r-exer: #6FD3AC; --r-exer-2: #B0EED3; --r-stand: #84B8F2; --r-stand-2: #BCDCFA; --s-awake: #F7AE9B; --s-rem: #7FD0F5; --s-core: #8AA2F5; --s-deep: #7A68E0; color-scheme: dark;
 }
 
 html, body { height: 100%; }
@@ -95,6 +97,14 @@ button { font: inherit; color: inherit; -webkit-tap-highlight-color: transparent
 @keyframes ping { 0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--good) 60%, transparent); } 100% { box-shadow: 0 0 0 10px transparent; } }
 h1 { font-size: 42px; font-weight: 750; letter-spacing: -0.04em; line-height: 0.98; text-wrap: balance; margin-top: 8px; }
 h1 .soft { color: var(--muted); }
+/* Personal greeting: score ring plus the reason in one line */
+.greet { display: flex; align-items: center; gap: 14px; }
+.score { position: relative; width: 64px; height: 64px; flex: none; }
+.score svg { width: 64px; height: 64px; transform: rotate(-90deg); }
+.score .arc { transition: stroke-dasharray 1s var(--ease); }
+.score b { position: absolute; inset: 0; display: grid; place-items: center; font-size: 20px; font-weight: 750; letter-spacing: -0.03em; font-variant-numeric: tabular-nums; }
+.greet p { font-size: 14px; line-height: 1.4; color: var(--muted); }
+.greet p strong { color: var(--ink); font-weight: 650; }
 
 /* Date strip */
 .dates { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; margin-inline: -4px; padding: 4px; }
@@ -144,7 +154,16 @@ button.card:active, .card[data-metric]:active { transform: scale(0.975); }
 .bar span { font-size: 11px; color: var(--muted); }
 .bar.sel span { color: var(--ink); font-weight: 600; }
 
-/* Water cups */
+/* Water glass: starts full at your target and empties as you drink */
+.water-row { display: flex; align-items: flex-end; justify-content: space-between; gap: 8px; }
+.glass { width: 58px; height: 89px; flex: none; overflow: visible; }
+.glass .water { animation: drain 1s var(--spring) both; }
+.glass .wave { animation: wave 2.6s linear infinite; }
+.glass .sip { animation: sip .9s var(--ease) both; }
+@keyframes drain { from { transform: translateY(var(--from)); } to { transform: translateY(var(--to)); } }
+@keyframes wave { to { transform: translateX(-30px); } }
+@keyframes sip { 0% { opacity: 0; transform: translateY(6px); } 30% { opacity: 1; } 100% { opacity: 0; transform: translateY(-14px); } }
+/* Water cups (unused) */
 .cups { display: grid; grid-template-columns: repeat(5, 1fr); gap: 5px; }
 .cup { height: 16px; border-radius: 5px 5px 7px 7px; background: var(--track); position: relative; overflow: hidden; }
 .cup.on { background: linear-gradient(180deg, color-mix(in srgb, var(--water) 55%, white), var(--water)); }
@@ -172,11 +191,39 @@ button.card:active, .card[data-metric]:active { transform: scale(0.975); }
 @keyframes pop { 0% { transform: scale(0); } 70% { transform: scale(1.25); } 100% { transform: scale(1); } }
 
 /* Rings */
-.rings { width: 104px; height: 104px; flex: none; }
-.rings .p { transition: stroke-dasharray .9s var(--ease); }
-.ring-row { display: flex; align-items: center; gap: 14px; }
-.ring-meta { display: flex; flex-direction: column; gap: 3px; font-size: 12.5px; font-variant-numeric: tabular-nums; min-width: 0; }
-.ring-meta b { font-weight: 650; margin-right: 4px; }
+.rings { width: 112px; height: 112px; flex: none; animation: breathe 6s ease-in-out infinite; }
+.rings .p { transition: stroke-dasharray 1.2s var(--ease); }
+@keyframes breathe { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.035); } }
+.ring-row { display: flex; align-items: center; gap: 18px; }
+.ring-meta { flex: 1; display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.ring-line { display: flex; flex-direction: column; gap: 5px; }
+.ring-line .top { display: flex; justify-content: space-between; align-items: baseline; font-size: 13px; }
+.ring-line .top span:first-child { font-weight: 600; }
+.ring-line .top span:last-child { color: var(--muted); font-variant-numeric: tabular-nums; font-size: 12.5px; }
+.soft-track { height: 5px; border-radius: 3px; background: var(--track); overflow: hidden; }
+.soft-track i { display: block; height: 100%; border-radius: 3px; transition: width 1.2s var(--ease); }
+
+/* Heart: ECG trace drawn live, paced to the real bpm */
+.ecg { width: 100%; height: 118px; display: block; }
+.beat { display: inline-block; transform-origin: 50% 60%; animation: lubdub var(--p) linear infinite; animation-delay: var(--o); }
+@keyframes lubdub { 0% { transform: scale(1); } 6% { transform: scale(1.22); } 12% { transform: scale(1.02); } 18% { transform: scale(1.14); } 30%, 100% { transform: scale(1); } }
+
+/* Sleep */
+.sleep-top { display: flex; align-items: center; gap: 14px; }
+.sleep-score { position: relative; width: 70px; height: 70px; flex: none; }
+.sleep-score svg { width: 70px; height: 70px; transform: rotate(-90deg); }
+.sleep-score b { position: absolute; inset: 0; display: grid; place-items: center; font-size: 22px; font-weight: 750; letter-spacing: -0.03em; font-variant-numeric: tabular-nums; }
+.sleep-facts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4px 10px; flex: 1; min-width: 0; }
+.sleep-facts div { display: flex; flex-direction: column; }
+.sleep-facts b { font-size: 16px; font-weight: 650; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+.sleep-facts span { font-size: 11px; color: var(--muted); }
+.hypno { width: 100%; height: auto; display: block; }
+.hypno text { font-size: 9px; fill: var(--muted); font-family: var(--font); }
+.stages { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+.stage { display: flex; flex-direction: column; gap: 4px; font-size: 11.5px; }
+.stage .k { display: flex; align-items: center; gap: 5px; color: var(--muted); font-weight: 600; }
+.stage .k i { width: 8px; height: 8px; border-radius: 2px; }
+.stage b { font-size: 14.5px; font-weight: 650; font-variant-numeric: tabular-nums; }
 
 .sync { text-align: center; font-size: 12px; color: var(--muted); padding-top: 2px; }
 
@@ -223,6 +270,40 @@ svg.chart text { fill: var(--muted); font-size: 10px; font-family: var(--font); 
 .btn.ink { background: var(--pill); color: var(--pill-fg); }
 .btn.glass { background: var(--glass-hi); color: var(--ink); border: 1px solid var(--edge); }
 .btn.brand { background: var(--brand); color: var(--on-brand); }
+
+/* Snap layout */
+.seg { position: relative; display: grid; grid-template-columns: 1fr 1fr; background: var(--glass); border: 1px solid var(--edge); border-radius: 999px; padding: 4px; backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); }
+.seg button { position: relative; z-index: 1; border: 0; background: none; padding: 10px; font-size: 15px; font-weight: 600; color: var(--muted); cursor: pointer; transition: color .3s; }
+.seg button[aria-selected="true"] { color: var(--pill-fg); }
+.seg-ind { position: absolute; top: 4px; bottom: 4px; left: 4px; width: calc(50% - 4px); border-radius: 999px; background: var(--pill); transition: transform .5s var(--spring); }
+.snap-card { align-items: center; text-align: center; gap: 10px; padding: 22px 16px 16px; }
+.snap-title { font-size: 20px; font-weight: 700; letter-spacing: -0.02em; }
+.snap-sub { max-width: 30ch; margin-inline: auto; }
+.btn-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; width: 100%; margin-top: 4px; }
+.snap-card > .btn { width: 100%; margin-top: 4px; }
+.cal-nav { display: flex; align-items: center; gap: 6px; font-size: 13px; }
+.cal-nav button { width: 28px; height: 28px; border-radius: 50%; border: 0; background: var(--track); font-size: 16px; line-height: 1; cursor: pointer; }
+.cal-head, .cal { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 5px; }
+.cal-head span { text-align: center; font-size: 11px; color: var(--muted); font-weight: 600; }
+.cal-cell { position: relative; aspect-ratio: 1; max-width: 100%; border-radius: 12px; border: 0; background: var(--track); background-size: cover; background-position: center; padding: 0; cursor: pointer; display: flex; align-items: flex-start; justify-content: flex-start; }
+.cal-cell.empty { background: none; }
+.cal-cell:disabled { cursor: default; opacity: 0.55; }
+.cal-cell .d { font-size: 11px; font-weight: 650; padding: 4px 0 0 5px; font-variant-numeric: tabular-nums; }
+.cal-cell.has-photo .d { color: #fff; text-shadow: 0 1px 3px rgba(0,0,0,.6); }
+.cal-cell.today { box-shadow: inset 0 0 0 2px var(--brand); }
+.cal-cell .c { position: absolute; right: 3px; bottom: 3px; min-width: 16px; height: 16px; border-radius: 8px; background: var(--pill); color: var(--pill-fg); font-size: 10px; font-weight: 700; display: grid; place-items: center; padding: 0 4px; }
+.cal-cell .dot { position: absolute; left: 50%; bottom: 6px; width: 5px; height: 5px; margin-left: -2.5px; border-radius: 50%; background: var(--brand); }
+.meal-entry { flex-direction: row; align-items: center; gap: 12px; }
+.meal-entry img { width: 72px; height: 72px; border-radius: 14px; object-fit: cover; flex: none; }
+.meal-meta { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.link-del { align-self: flex-start; border: 0; background: none; padding: 0; color: var(--warn); font-size: 13px; font-weight: 600; cursor: pointer; }
+.compare { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.compare figure { margin: 0; display: flex; flex-direction: column; gap: 6px; }
+.compare img { width: 100%; aspect-ratio: 3 / 4; object-fit: cover; border-radius: 16px; display: block; }
+.compare figcaption { font-size: 12px; color: var(--muted); text-align: center; font-variant-numeric: tabular-nums; }
+.pgrid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+.pcell { position: relative; aspect-ratio: 3 / 4; max-width: 100%; border: 0; border-radius: 14px; background-size: cover; background-position: center; cursor: pointer; padding: 0; }
+.pcell span { position: absolute; left: 6px; bottom: 6px; font-size: 10.5px; font-weight: 650; color: #fff; text-shadow: 0 1px 3px rgba(0,0,0,.6); }
 
 /* Snap */
 .lens { width: 210px; height: 210px; margin: 6px auto 4px; border-radius: 50%; position: relative; display: grid; place-items: center; }
@@ -292,6 +373,65 @@ svg.chart text { fill: var(--muted); font-size: 10px; font-family: var(--font); 
 .toast span { font-size: 12px; color: var(--muted); }
 @keyframes drop { from { transform: translate(-50%, -160%) scale(0.9); } to { transform: translate(-50%, 0); } }
 canvas.confetti { position: absolute; inset: 0; z-index: 25; pointer-events: none; }
+
+/* Sync menu: pull-down from the sync button */
+.menu-scrim { position: absolute; inset: 0; z-index: 20; background: rgba(20, 8, 12, 0.12); animation: fade .2s ease; }
+.menu { position: absolute; top: calc(66px + env(safe-area-inset-top, 0px)); right: max(16px, env(safe-area-inset-right, 0px)); width: min(340px, calc(100% - 32px)); max-height: calc(100% - 170px);
+  overflow-y: auto; scrollbar-width: none; background: var(--glass-hi); border: 1px solid var(--edge); border-radius: 26px; padding: 14px; display: flex; flex-direction: column; gap: 12px;
+  backdrop-filter: blur(30px) saturate(1.4); -webkit-backdrop-filter: blur(30px) saturate(1.4); box-shadow: 0 24px 60px -18px rgba(40, 10, 20, 0.4);
+  transform-origin: calc(100% - 22px) -10px; animation: menuIn .42s var(--spring); }
+@keyframes menuIn { from { opacity: 0; transform: scale(0.6); } to { opacity: 1; transform: none; } }
+.menu .row { display: flex; align-items: center; gap: 12px; }
+.menu .row + .row { border-top: 1px solid var(--track); padding-top: 10px; }
+.menu .ico { width: 36px; height: 36px; border-radius: 11px; display: grid; place-items: center; flex: none; color: #fff; }
+.menu .ico svg { width: 19px; height: 19px; }
+.menu .rt { font-size: 15px; font-weight: 600; letter-spacing: -0.01em; }
+.menu .rs { font-size: 12px; color: var(--muted); line-height: 1.35; }
+.menu .when { margin-left: auto; font-size: 12px; color: var(--muted); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--good); margin-right: 5px; vertical-align: 1px; }
+.kv { display: grid; grid-template-columns: 1fr auto; gap: 8px 12px; font-size: 14px; }
+.kv dt { color: var(--muted); }
+.kv dd { font-weight: 600; text-align: right; font-variant-numeric: tabular-nums; }
+.kv dd.unset { font-weight: 500; color: var(--muted); }
+.btn.sm { padding: 12px; font-size: 15px; border-radius: 16px; }
+.spin svg { animation: spin .9s linear infinite; }
+
+/* Name in the greeting */
+.name-btn { font: inherit; letter-spacing: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; text-decoration: underline; text-decoration-color: color-mix(in srgb, var(--brand) 55%, transparent); text-decoration-thickness: 3px; text-underline-offset: 6px; }
+
+/* Ask coach card */
+.ask { gap: 10px; }
+.ask-field { display: flex; align-items: center; gap: 10px; width: 100%; border: 1px solid var(--edge); background: var(--glass-hi); border-radius: 18px; padding: 12px 12px 12px 14px; font-size: 15px; color: var(--muted); cursor: text; text-align: left; }
+.ask-field .go { margin-left: auto; width: 32px; height: 32px; border-radius: 50%; background: var(--pill); color: var(--pill-fg); display: grid; place-items: center; flex: none; }
+.ask-field .go svg { width: 16px; height: 16px; }
+.chips { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; margin-inline: -2px; padding: 2px; }
+.chips::-webkit-scrollbar { display: none; }
+.chip { flex: none; border: 1px solid var(--edge); background: var(--glass-hi); border-radius: 999px; padding: 7px 12px; font-size: 13px; font-weight: 550; cursor: pointer; white-space: nowrap; transition: transform .2s var(--spring); }
+.chip:active { transform: scale(0.95); }
+.engine { display: inline-flex; align-items: center; gap: 6px; font-size: 11.5px; font-weight: 600; color: var(--muted); }
+.engine svg { width: 13px; height: 13px; color: var(--brand); }
+.coach-orb { width: 30px; height: 30px; border-radius: 50%; flex: none; background: conic-gradient(from 0deg, var(--brand), var(--sky-a), var(--brand-2), var(--sky-b), var(--brand)); animation: spin 8s linear infinite; position: relative; }
+.coach-orb::after { content: ""; position: absolute; inset: 7px; border-radius: 50%; background: var(--glass-hi); }
+
+/* Chat sheet */
+.chat { display: flex; flex-direction: column; height: min(78vh, 680px); max-height: 100%; }
+.chat-log { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; padding: 4px 2px 10px; scrollbar-width: none; }
+.msg { max-width: 86%; padding: 10px 13px; border-radius: 20px; font-size: 15px; line-height: 1.42; white-space: pre-wrap; overflow-wrap: anywhere; animation: rise .35s var(--ease) both; }
+.msg.me { align-self: flex-end; background: var(--pill); color: var(--pill-fg); border-bottom-right-radius: 6px; }
+.msg.bot { align-self: flex-start; background: var(--glass); border: 1px solid var(--edge); border-bottom-left-radius: 6px; }
+.msg .meta { display: block; margin-top: 6px; font-size: 11px; color: var(--muted); }
+.typing { display: inline-flex; gap: 4px; padding: 4px 2px; }
+.typing i { width: 7px; height: 7px; border-radius: 50%; background: var(--muted); animation: dot 1.2s ease-in-out infinite; }
+.typing i:nth-child(2) { animation-delay: .15s; } .typing i:nth-child(3) { animation-delay: .3s; }
+@keyframes dot { 0%, 60%, 100% { transform: translateY(0); opacity: .5; } 30% { transform: translateY(-5px); opacity: 1; } }
+.composer { display: flex; gap: 8px; align-items: flex-end; padding-top: 8px; border-top: 1px solid var(--track); }
+.composer textarea { flex: 1; min-width: 0; resize: none; font: inherit; font-size: 16px; border: 1px solid var(--edge); background: var(--glass-hi); color: var(--ink); border-radius: 20px; padding: 10px 14px; max-height: 110px; }
+.insights { display: flex; flex-direction: column; gap: 8px; align-self: stretch; animation: rise .4s var(--ease) both; }
+.insight { background: var(--glass); border: 1px solid var(--edge); border-radius: 18px; padding: 12px 14px; display: flex; flex-direction: column; gap: 4px; }
+.insight b { font-size: 15px; letter-spacing: -0.01em; }
+.insight p { font-size: 14px; line-height: 1.4; }
+.insight .do { font-size: 13px; color: var(--muted); }
+.insight .do strong { color: var(--brand); font-weight: 650; }
 
 /* Launch */
 .launch { position: absolute; inset: 0; z-index: 40; display: grid; place-items: center; background: var(--sky-c); animation: launchOut .45s ease 1.25s both; }
@@ -481,16 +621,156 @@ canvas.confetti { position: absolute; inset: 0; z-index: 25; pointer-events: non
   }
   const N = (key, v, d = 0) => `<span data-n="${key}" data-v="${v}" data-d="${d}">${fmt(v, d)}</span>`;
 
+  // ---------- Greeting and BE score ----------
+  // Score 0-100: 55% recovery (sleep, resting heart rate, HRV against your normal),
+  // 45% activity (steps, exercise, water against your plan). The greeting reads the same signals.
+  const clamp = (x) => Math.max(0, Math.min(1, x));
+  function scoreFor(V) {
+    const rec = (clamp(V.sleep / T.sleep) + clamp(1 - Math.max(0, V.rhr - base.rhr) / 10) + clamp(V.hrv / base.hrv)) / 3;
+    const act = (clamp(V.steps / T.steps) + clamp(V.exercise / T.exercise) + clamp(V.water / T.water)) / 3;
+    return { score: Math.round(100 * (0.55 * rec + 0.45 * act)), rec, act };
+  }
+  function greeting() {
+    const V = dayV(), { score, rec, act } = scoreFor(V), now = isToday();
+    const flags = [];
+    if (V.sleep < T.sleep - 1) flags.push('a short night');
+    if ((V.rhr - base.rhr) / sd.rhr >= 1.5) flags.push(`resting heart rate up ${V.rhr - base.rhr} bpm`);
+    if ((V.hrv - base.hrv) / sd.hrv <= -1.5) flags.push('HRV below your usual');
+    const list = (a) => a.length > 1 ? a.slice(0, -1).join(', ') + ' and ' + a[a.length - 1] : a[0];
+    const cap = (t) => t[0].toUpperCase() + t.slice(1);
+    if (!now) {
+      const day = days[S.sel].date.toLocaleDateString('en-AU', { weekday: 'long' });
+      const line = score >= 85 ? 'was a cracker' : score >= 70 ? 'was a solid day' : flags.length ? 'was a recovery day' : 'was a quieter day';
+      return { hello: day, line, score, why: flags.length ? `${cap(list(flags))}.` : `${fmt(V.steps)} steps and ${fmt(V.sleep, 1)} h of sleep.` };
+    }
+    const h = new Date().getHours();
+    const hello = h < 12 ? 'Good morning' : h < 18 ? 'Good afternoon' : 'Good evening';
+    if (flags.length >= 2 || rec < 0.75) {
+      return { hello, line: 'easy does it today', score, why: `${cap(list(flags))}. Keep training light, drink water and aim for an early night.` };
+    }
+    if (score >= 85) return { hello, line: "you're on fire", score, why: 'Recovered and moving well. A great day to push a little harder.' };
+    if (S.secured && act >= 0.9) return { hello, line: 'nearly there', score, why: 'Quests done and targets close. One more push closes the day.' };
+    if (rec >= 0.9) return { hello, line: "you're ready to go", score, why: 'Well recovered. A good day for a harder session.' };
+    return { hello, line: 'steady as she goes', score, why: flags.length ? `${cap(list(flags))}, otherwise on track.` : 'On track. Keep chipping away at your targets.' };
+  }
+
+  // ---------- Water glass ----------
+  // The glass holds today's target. It starts full and drains as you drink, so empty means done.
+  const glassLevel = {};
+  function glass(V) {
+    const rem = clamp(1 - V.water / T.water);
+    const prev = S.sel in glassLevel ? glassLevel[S.sel] : rem;
+    glassLevel[S.sel] = rem;
+    const y = (f) => (8 + (1 - f) * 79).toFixed(1);
+    const sipped = S.justAdded && isToday();
+    return `<svg class="glass" viewBox="0 0 60 92" role="img" aria-label="${fmt(Math.max(0, T.water - V.water), 2)} litres left of ${fmt(T.water, 1)}">
+      <defs>
+        <clipPath id="g-in"><path d="M6.6 6 L53.4 6 L48.2 84.6 Q47.9 86.6 45.6 86.6 L14.4 86.6 Q12.1 86.6 11.8 84.6 Z"/></clipPath>
+        <linearGradient id="g-water" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="var(--water)" stop-opacity=".5"/><stop offset="1" stop-color="var(--water)" stop-opacity=".95"/></linearGradient>
+      </defs>
+      <path d="M4 4 L56 4 L50.3 86 Q49.9 88.6 47.2 88.6 L12.8 88.6 Q10.1 88.6 9.7 86 Z" fill="var(--glass-hi)" fill-opacity=".6"/>
+      <g clip-path="url(#g-in)">
+        <g class="water" style="--from:${y(prev)}px;--to:${y(rem)}px;transform:translateY(${y(rem)}px)">
+          <path class="wave" style="animation-delay:-${Math.round(performance.now() % 2600)}ms" d="M0 3 Q7.5 0 15 3 T30 3 T45 3 T60 3 T75 3 T90 3 T105 3 T120 3 V120 H0 Z" fill="url(#g-water)"/>
+        </g>
+      </g>
+      <path d="M4 4 L56 4 L50.3 86 Q49.9 88.6 47.2 88.6 L12.8 88.6 Q10.1 88.6 9.7 86 Z" fill="none" stroke="var(--ink)" stroke-opacity=".38" stroke-width="1.6" stroke-linejoin="round"/>
+      <path d="M10.5 11 L14.6 78" stroke="#ffffff" stroke-opacity=".6" stroke-width="2.4" stroke-linecap="round"/>
+      ${sipped ? `<text class="sip" x="30" y="${(Number(y(rem)) - 4).toFixed(1)}" text-anchor="middle" font-size="10" font-weight="700" fill="var(--water)" font-family="-apple-system, system-ui, sans-serif">−250 ml</text>` : ''}
+    </svg>`;
+  }
+
   // ---------- Today ----------
   function heartTicks() {
     const now = performance.now(), hs = [38, 70, 52, 90, 30, 64, 100, 44, 76, 58, 34, 88, 62, 40, 80, 54, 96, 36, 68, 48, 84];
     return hs.map((h, i) => { const d = 1100 + (i % 5) * 230; return `<i style="height:${h}%;--d:${d}ms;--o:-${Math.round((now + i * 170) % d)}ms"></i>`; }).join('');
   }
+  // Soft rings: pastel gradients, thin strokes, a slow breathing motion.
   function ringsSvg(r) {
-    const ring = (f, c, rad) => { const C = 2 * Math.PI * rad; return `<circle cx="52" cy="52" r="${rad}" fill="none" stroke="${c}" stroke-opacity=".18" stroke-width="10"/>
-      <circle class="p" cx="52" cy="52" r="${rad}" fill="none" stroke="${c}" stroke-width="10" stroke-linecap="round" stroke-dasharray="${(C * Math.min(1, f)).toFixed(1)} ${C.toFixed(1)}" transform="rotate(-90 52 52)"/>`; };
-    return `<svg class="rings" viewBox="0 0 104 104" role="img" aria-label="Move ${Math.round(r.move / r.moveGoal * 100)}%, exercise ${Math.round(r.ex / r.exGoal * 100)}%, stand ${Math.round(r.stand / r.standGoal * 100)}%">
-      ${ring(r.move / r.moveGoal, 'var(--move)', 46)}${ring(r.ex / r.exGoal, 'var(--exer)', 34)}${ring(r.stand / r.standGoal, 'var(--stand)', 22)}</svg>`;
+    const ring = (f, c, rad, id) => { const C = 2 * Math.PI * rad; return `<linearGradient id="${id}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="var(${c}-2)"/><stop offset="1" stop-color="var(${c})"/></linearGradient>
+      <circle cx="56" cy="56" r="${rad}" fill="none" stroke="var(${c})" stroke-opacity=".14" stroke-width="9"/>
+      <circle class="p" cx="56" cy="56" r="${rad}" fill="none" stroke="url(#${id})" stroke-width="9" stroke-linecap="round" stroke-dasharray="${(C * Math.min(1, f)).toFixed(1)} ${C.toFixed(1)}" transform="rotate(-90 56 56)"/>`; };
+    return `<svg class="rings" viewBox="0 0 112 112" role="img" aria-label="Move ${Math.round(r.move / r.moveGoal * 100)}%, exercise ${Math.round(r.ex / r.exGoal * 100)}%, stand ${Math.round(r.stand / r.standGoal * 100)}%">
+      ${ring(r.move / r.moveGoal, '--r-move', 50, 'rg1')}${ring(r.ex / r.exGoal, '--r-exer', 38, 'rg2')}${ring(r.stand / r.standGoal, '--r-stand', 26, 'rg3')}</svg>`;
+  }
+
+  // ---------- Sleep: stages, hypnogram and a BE sleep score ----------
+  // Stage minutes come from Apple Health sleep samples (asleepREM, asleepCore, asleepDeep, awake).
+  // BE's score: duration vs target (60), deep + REM share (25), time asleep vs in bed (15).
+  const SLEEP_PATTERN = [['core', 20], ['deep', 45], ['core', 25], ['rem', 15], ['awake', 4], ['core', 30], ['deep', 30], ['core', 20], ['rem', 25], ['core', 35], ['deep', 8], ['rem', 22], ['awake', 8], ['core', 30], ['rem', 20], ['core', 18], ['awake', 10]];
+  function sleepFor(V) {
+    const asleep = V.sleep * 60;
+    const share = { deep: 0.21, rem: 0.21, core: 0.58 };
+    const mins = { deep: Math.round(asleep * share.deep), rem: Math.round(asleep * share.rem), core: 0, awake: Math.round(24 + (7.5 - V.sleep) * 4) };
+    mins.core = Math.round(asleep) - mins.deep - mins.rem;
+    const totals = SLEEP_PATTERN.reduce((a, [k, m]) => (a[k] = (a[k] || 0) + m, a), {});
+    const segs = SLEEP_PATTERN.map(([k, m]) => [k, m * mins[k] / totals[k]]);
+    const inBed = segs.reduce((a, [, m]) => a + m, 0);
+    const wake = 6 * 60 + 24, bed = wake - inBed;
+    const dur = clamp(1 - Math.max(0, T.sleep * 60 - asleep) / 150), resto = clamp((mins.deep + mins.rem) / asleep / 0.45), eff = clamp(asleep / inBed / 0.95);
+    const score = Math.round(60 * dur + 25 * resto + 15 * eff);
+    return { mins, segs, inBed, bed, wake, score, eff: Math.round(asleep / inBed * 100) };
+  }
+  const hm = (m) => { const t = ((Math.round(m) % 1440) + 1440) % 1440; return `${String(Math.floor(t / 60)).padStart(2, '0')}:${String(t % 60).padStart(2, '0')}`; };
+  const hrs = (m) => `${Math.floor(m / 60)}h ${String(Math.round(m % 60)).padStart(2, '0')}m`;
+  function sleepCard(i) {
+    const V = dayV(), sl = sleepFor(V), c = coach('sleep');
+    const label = sl.score >= 85 ? 'Excellent' : sl.score >= 70 ? 'Good' : sl.score >= 55 ? 'Fair' : 'Poor';
+    const C = 2 * Math.PI * 29;
+    const W = 320, H = 96, L = 34, top = 8, rowH = 20, lv = { awake: 0, rem: 1, core: 2, deep: 3 };
+    let x = L, bars = '';
+    sl.segs.forEach(([k, m]) => { const w = (W - L) * m / sl.inBed; bars += `<rect x="${x.toFixed(1)}" y="${top + lv[k] * rowH + 3}" width="${Math.max(1.5, w - 0.8).toFixed(1)}" height="${rowH - 6}" rx="4" fill="var(--s-${k})"/>`; x += w; });
+    const rows = ['Awake', 'REM', 'Core', 'Deep'].map((n, r) => `<text x="0" y="${top + r * rowH + 13}">${n}</text><line x1="${L}" x2="${W}" y1="${top + r * rowH + rowH / 2}" y2="${top + r * rowH + rowH / 2}" stroke="var(--track)"/>`).join('');
+    return `<div class="card span2" style="--i:${i};gap:12px" data-metric="sleep" role="button" tabindex="0" aria-label="Sleep ${fmt(V.sleep, 1)} hours, sleep score ${sl.score}. Open details.">
+      <div class="ch" style="color:var(--sleep)">${svg('moon')}<span style="color:var(--ink)">Sleep</span><span class="end note" style="font-weight:500">${hm(sl.bed)} – ${hm(sl.wake)}</span></div>
+      <div class="sleep-top">
+        <div class="sleep-score" aria-hidden="true"><svg viewBox="0 0 70 70"><circle cx="35" cy="35" r="29" fill="none" stroke="var(--track)" stroke-width="7"/>
+          <circle cx="35" cy="35" r="29" fill="none" stroke="var(--s-core)" stroke-width="7" stroke-linecap="round" stroke-dasharray="${(C * sl.score / 100).toFixed(1)} ${C.toFixed(1)}" style="transition:stroke-dasharray 1s var(--ease)"/></svg><b>${N('sleepscore', sl.score)}</b></div>
+        <div class="sleep-facts">
+          <div><b>${hrs(V.sleep * 60)}</b><span>Asleep</span></div>
+          <div><b>${label}</b><span>Sleep score</span></div>
+          <div><b>${sl.eff}%</b><span>Efficiency</span></div>
+          <div><b>${hrs(sl.inBed)}</b><span>In bed</span></div>
+          <div><b>${sl.mins.awake}m</b><span>Awake</span></div>
+          <div><b>${V.hrv} ms</b><span>Night HRV</span></div>
+        </div>
+      </div>
+      <svg class="hypno" viewBox="0 0 ${W} ${H}" role="img" aria-label="Sleep stages through the night">${rows}${bars}</svg>
+      <div class="stages">${[['REM', 'rem'], ['Core', 'core'], ['Deep', 'deep'], ['Awake', 'awake']].map(([n, k]) => `<div class="stage"><span class="k"><i style="background:var(--s-${k})"></i>${n}</span><b>${hrs(sl.mins[k])}</b>${k !== 'awake' ? `<span class="note" style="font-size:11px">${Math.round(sl.mins[k] / (V.sleep * 60) * 100)}%</span>` : '<span class="note" style="font-size:11px">&nbsp;</span>'}</div>`).join('')}</div>
+      ${coachLine(c)}
+    </div>`;
+  }
+
+  // ---------- Heart: live ECG, paced to the bpm on screen ----------
+  // A PQRST complex built from Gaussian waves, with slight beat-to-beat variation and baseline wander.
+  function ecgValue(t, period) {
+    const n = Math.floor(t / period), p = (t - n * period) / period;
+    const g = (mu, a, w) => a * Math.exp(-((p - mu) ** 2) / (2 * w * w));
+    const jitter = 1 + 0.06 * Math.sin(n * 1.7);
+    return (g(0.16, 0.11, 0.022) + g(0.285, -0.09, 0.008) + g(0.31, 1.0 * jitter, 0.0085) + g(0.335, -0.2, 0.01) + g(0.56, 0.24, 0.045)) + 0.025 * Math.sin(t / 2300);
+  }
+  let ecgColour = '', ecgColourAt = 0;
+  function drawEcg(now) {
+    const cv = document.getElementById('ecg');
+    if (cv && cv.offsetParent) {
+      const dpr = devicePixelRatio || 1, w = cv.clientWidth, h = cv.clientHeight;
+      if (cv.width !== Math.round(w * dpr)) { cv.width = Math.round(w * dpr); cv.height = Math.round(h * dpr); }
+      if (!ecgColour || now - ecgColourAt > 1000) { ecgColour = getComputedStyle(cv).getPropertyValue('--heart').trim() || '#FF6B2C'; ecgColourAt = now; }
+      const ctx = cv.getContext('2d'); ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.clearRect(0, 0, w, h);
+      const period = 60000 / Number(cv.dataset.bpm || 60), span = period * 2.6, mid = h * 0.62, amp = h * 0.5;
+      const t = reduce ? period * 0.9 : now;
+      // faint grid like monitor paper
+      ctx.strokeStyle = ecgColour; ctx.globalAlpha = 0.08; ctx.lineWidth = 1;
+      for (let gx = 0; gx <= w; gx += 12) { ctx.beginPath(); ctx.moveTo(gx, 0); ctx.lineTo(gx, h); ctx.stroke(); }
+      ctx.globalAlpha = 1; ctx.lineWidth = 2; ctx.lineJoin = 'round'; ctx.lineCap = 'round';
+      const grad = ctx.createLinearGradient(0, 0, w, 0); grad.addColorStop(0, 'transparent'); grad.addColorStop(0.35, ecgColour); grad.addColorStop(1, ecgColour);
+      ctx.strokeStyle = grad; ctx.beginPath();
+      for (let x = 0; x <= w; x += 1) { const tt = t - span + span * x / w, y = mid - ecgValue(tt, period) * amp; x ? ctx.lineTo(x, y) : ctx.moveTo(x, y); }
+      ctx.stroke();
+      const yEnd = mid - ecgValue(t, period) * amp;
+      ctx.fillStyle = ecgColour; ctx.shadowColor = ecgColour; ctx.shadowBlur = 10; ctx.beginPath(); ctx.arc(w - 2, yEnd, 3.2, 0, Math.PI * 2); ctx.fill(); ctx.shadowBlur = 0;
+    }
+    if (!reduce) requestAnimationFrame(drawEcg);
   }
   function small(k, i) {
     const m = M[k], v = dayV()[k], t = T[k];
@@ -502,17 +782,28 @@ canvas.confetti { position: absolute; inset: 0; z-index: 25; pointer-events: non
   function renderToday(enter) {
     const V = dayV(), R = days[S.sel].rings, now = isToday();
     const maxSteps = Math.max(...days.map((d) => d.v.steps), T.steps) * 1.05;
-    const cups = Math.round(V.water / 0.25), cupMax = Math.round(T.water / 0.25);
     const q = QUESTS.filter((x) => x.done()).length;
     const el = document.getElementById('v-today');
-    const greet = now ? 'today' : days[S.sel].date.toLocaleDateString('en-AU', { weekday: 'long' });
+    const g = greeting();
     el.innerHTML = `
       <div class="top">
         <button class="brand" data-act="launch" aria-label="BE. Replay launch animation"><img src="${LOGO}" alt=""><b>BE</b></button>
-        <button class="round live" id="live" data-act="noop" aria-label="Synced with Apple Health">${svg('sync')}</button>
+        <button class="round live" id="live" data-act="menu" aria-haspopup="dialog" aria-label="Apple Health sync, devices and profile">${svg('sync')}</button>
       </div>
-      <h1 style="--i:0">Be well<br><span class="soft">${esc(greet)}</span></h1>
-      <div class="dates" role="group" aria-label="Choose a day" style="--i:1">
+      <h1 style="--i:0">${esc(g.hello)}${now ? `, <button class="name-btn" data-act="name" aria-label="Your name: ${esc(userName)}. Change">${esc(userName)}</button>` : ''}<br><span class="soft">${esc(g.line)}</span></h1>
+      <div class="greet card" style="--i:1;flex-direction:row;padding:12px 14px" aria-label="BE score ${g.score} out of 100. ${esc(g.why)}">
+        <div class="score" aria-hidden="true"><svg viewBox="0 0 64 64"><defs><linearGradient id="sg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="var(--brand-2)"/><stop offset="1" stop-color="var(--brand)"/></linearGradient></defs>
+          <circle cx="32" cy="32" r="27" fill="none" stroke="var(--track)" stroke-width="7"/>
+          <circle class="arc" cx="32" cy="32" r="27" fill="none" stroke="url(#sg)" stroke-width="7" stroke-linecap="round" stroke-dasharray="${(2 * Math.PI * 27 * g.score / 100).toFixed(1)} ${(2 * Math.PI * 27).toFixed(1)}"/></svg>
+          <b>${N('score', g.score)}</b></div>
+        <p><strong>BE score ${g.score}.</strong> ${esc(g.why)}</p>
+      </div>
+      ${now ? `<div class="card ask" style="--i:2">
+        <div class="ch"><span class="coach-orb" aria-hidden="true"></span><span>Ask your coach</span><span class="end engine">${svg('sparkle')}${ENGINE.short}</span></div>
+        <button class="ask-field" data-act="ask">Ask anything about your health…<span class="go">${svg('arrowUp')}</span></button>
+        <div class="chips">${SUGGEST.map((q) => `<button class="chip" data-ask="${esc(q)}">${esc(q)}</button>`).join('')}</div>
+      </div>` : ''}
+      <div class="dates" role="group" aria-label="Choose a day" style="--i:3">
         ${days.map((d, i) => `<button class="date" data-day="${i}" aria-pressed="${i === S.sel}"><b>${d.date.getDate()}</b><span>${d.today ? 'Today' : d.date.toLocaleDateString('en-AU', { weekday: 'short' })}</span></button>`).join('')}
       </div>
       <div class="bento">
@@ -524,15 +815,20 @@ canvas.confetti { position: absolute; inset: 0; z-index: 25; pointer-events: non
 
         <div class="card" style="--i:3;padding-bottom:62px" data-metric="water" role="button" tabindex="0" aria-label="Water, ${fmt(V.water, 2)} of ${T.water} litres. Open details.">
           <div class="ch" style="color:var(--water)">${svg('drop')}<span style="color:var(--ink)">Water</span></div>
-          <div class="num">${N('water', V.water, 2)}<small>/${fmt(T.water, 1)} L</small></div>
-          <div class="cups" aria-hidden="true">${Array.from({ length: cupMax }, (_, i) => `<i class="cup ${i < cups ? 'on' : ''} ${i === cups - 1 && S.justAdded ? 'new' : ''}"></i>`).join('')}</div>
+          <div class="water-row">
+            <div style="min-width:0">
+              <div class="num">${N('water', V.water, 2)}<small>/${fmt(T.water, 1)} L</small></div>
+              <div class="note" style="font-size:12px;margin-top:4px">${V.water >= T.water ? 'Glass empty. Target hit.' : `${fmt(T.water - V.water, 2)} L left in your glass`}</div>
+            </div>
+            ${glass(V)}
+          </div>
           ${coachLine(coach('water'))}
           ${now ? `<button class="arrow plus" data-water="0.25" aria-label="Add 250 millilitres">${svg('plus')}</button>` : ''}
         </div>
 
         <div class="card tall" style="--i:4" data-metric="rhr" role="button" tabindex="0" aria-label="Resting heart rate ${V.rhr} bpm. Open details.">
-          <div class="ch" style="color:var(--heart)">${svg('heart')}<span style="color:var(--ink)">Heart rate</span></div>
-          <div class="ticks" aria-hidden="true">${heartTicks()}</div>
+          <div class="ch" style="color:var(--heart)"><span class="beat" style="--p:${(60 / V.rhr).toFixed(3)}s;--o:-${Math.round(performance.now() % (60000 / V.rhr))}ms">${svg('heart')}</span><span style="color:var(--ink)">Heart rate</span></div>
+          <canvas class="ecg" id="ecg" data-bpm="${V.rhr}" aria-hidden="true"></canvas>
           <div class="grow"></div>
           <div class="num xl">${N('rhr', V.rhr)}<small>bpm</small></div>
           ${coachLine(coach('rhr'))}
@@ -553,51 +849,152 @@ canvas.confetti { position: absolute; inset: 0; z-index: 25; pointer-events: non
           </div>
         </div>` : ''}
 
-        <div class="card span2" style="--i:7">
+        <div class="card span2" style="--i:7;gap:12px">
+          <div class="ch" style="color:var(--r-move)">${svg('rings')}<span style="color:var(--ink)">Rings</span><span class="end note" style="font-weight:500">${R.move >= R.moveGoal && R.ex >= R.exGoal && R.stand >= R.standGoal ? 'All closed' : 'Keep a gentle pace'}</span></div>
           <div class="ring-row">${ringsSvg(R)}
             <div class="ring-meta">
-              <div class="ch" style="color:var(--move);margin-bottom:2px">${svg('rings')}<span style="color:var(--ink)">Rings</span></div>
-              <div><b style="color:var(--move)">Move</b>${R.move}/${R.moveGoal} kcal</div>
-              <div><b style="color:var(--exer)">Exercise</b>${R.ex}/${R.exGoal} min</div>
-              <div><b style="color:var(--stand)">Stand</b>${R.stand}/${R.standGoal} h</div>
-              <div style="color:var(--muted)">${R.ex >= R.exGoal ? 'Exercise ring closed.' : `${R.exGoal - R.ex} brisk minutes closes Exercise.`}</div>
+              ${[['Move', R.move, R.moveGoal, 'kcal', '--r-move'], ['Exercise', R.ex, R.exGoal, 'min', '--r-exer'], ['Stand', R.stand, R.standGoal, 'h', '--r-stand']].map(([n, v, g, u, c]) => `<div class="ring-line"><div class="top"><span>${n}</span><span>${v} / ${g} ${u}</span></div><div class="soft-track"><i style="width:${Math.round(Math.min(1, v / g) * 100)}%;background:linear-gradient(90deg, var(${c}-2), var(${c}))"></i></div></div>`).join('')}
             </div>
           </div>
+          <div class="coach"><span>${R.ex >= R.exGoal ? 'Exercise is done. An easy stroll keeps Move ticking over.' : `${R.exGoal - R.ex} easy minutes of walking closes Exercise. No need to push today.`}</span></div>
         </div>
 
-        ${small('sleep', 8)}${small('hrv', 9)}${small('spo2', 10)}${small('vo2', 11)}${small('weight', 12)}${small('exercise', 13)}
+        ${sleepCard(8)}${small('hrv', 9)}${small('spo2', 10)}${small('vo2', 11)}${small('weight', 12)}
       </div>
-      <p class="sync">${now ? 'Synced with Apple Health just now' : 'Past day · from Apple Health'}</p>`;
+      <p class="sync">${now ? `Synced with Apple Health ${ago(S.lastSync)}` : 'Past day · from Apple Health'}</p>`;
     S.justAdded = false;
+    if (reduce) requestAnimationFrame(drawEcg);
     play(el, enter);
     count(el);
   }
 
-  // ---------- Snap ----------
-  let snapPhase = 'idle', snapImg = null, consented = false;
+  // ---------- Snap: meals diary and progress photos ----------
+  // Photos are kept inside the app, never in the photo library. In this preview they stay in this
+  // browser (IndexedDB); in the iPhone app they live in BE's protected app storage.
+  let snapPhase = 'idle', snapImg = null, consented = false, snapMode = 'meals';
+  const calMonth = new Date(); calMonth.setDate(1);
+  const photos = { meals: [], progress: [] };
+  const vault = (() => {
+    let dbp = null;
+    const open = () => dbp || (dbp = new Promise((res, rej) => {
+      try { const r = indexedDB.open('be-photos', 1);
+        r.onupgradeneeded = () => { r.result.createObjectStore('meals', { keyPath: 'id' }); r.result.createObjectStore('progress', { keyPath: 'id' }); };
+        r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error);
+      } catch (e) { rej(e); } }));
+    const run = async (name, mode, fn) => { try { const db = await open(); return await new Promise((res) => { const tx = db.transaction(name, mode); const q = fn(tx.objectStore(name)); tx.oncomplete = () => res(q && q.result); tx.onerror = () => res(null); }); } catch (e) { return null; } };
+    return { all: (n) => run(n, 'readonly', (st) => st.getAll()), put: (n, v) => run(n, 'readwrite', (st) => st.put(v)), del: (n, id) => run(n, 'readwrite', (st) => st.delete(id)) };
+  })();
+  Promise.all([vault.all('meals'), vault.all('progress')]).then(([m, p]) => { photos.meals = m || []; photos.progress = p || []; if (current === 'snap') renderSnap(); });
+  function shrink(dataUrl, max = 720) {
+    return new Promise((res) => { const img = new Image(); img.onload = () => {
+      const k = Math.min(1, max / Math.max(img.width, img.height)), c = document.createElement('canvas');
+      c.width = Math.round(img.width * k); c.height = Math.round(img.height * k);
+      c.getContext('2d').drawImage(img, 0, 0, c.width, c.height); res(c.toDataURL('image/jpeg', 0.8)); };
+      img.onerror = () => res(null); img.src = dataUrl; });
+  }
+  const dayKey = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  // Sample history so the diary isn't empty: meals logged (without photos) on the past six days.
+  const SAMPLE_MEALS = {};
+  days.slice(0, 6).forEach((d, i) => { SAMPLE_MEALS[dayKey(d.date)] = [['Oats, berries and yoghurt', 420], ['Chicken salad wrap', 560], ['Salmon, rice and greens', 690]].slice(0, 2 + (i % 2)); });
+
   function renderSnap(enter) {
     const el = document.getElementById('v-snap');
     el.innerHTML = `
       <div class="top"><div class="brand"><img src="${LOGO}" alt=""><b>BE</b></div><span></span></div>
-      <h1 style="--i:0">Snap<br><span class="soft">your meal</span></h1>
-      <div class="card" style="--i:1;align-items:center;text-align:center;padding-block:22px">
-        <div class="lens"><div class="face ${snapPhase === 'busy' ? 'scan' : ''}">${snapImg ? `<img src="${snapImg}" alt="Your meal photo">` : svg('camera')}</div></div>
-        <div style="font-size:20px;font-weight:700;letter-spacing:-0.02em">${snapPhase === 'busy' ? 'Reading your plate…' : 'Point, shoot, done'}</div>
-        <p class="note" style="max-width:30ch">BE estimates the foods, calories and macros. You check them before anything is saved.</p>
+      <h1 style="--i:0">${snapMode === 'meals' ? 'Snap<br><span class="soft">your meal</span>' : 'Track<br><span class="soft">your progress</span>'}</h1>
+      <div class="seg" role="tablist" aria-label="Snap mode" style="--i:1">
+        <span class="seg-ind" style="transform:translateX(${snapMode === 'meals' ? '0' : '100%'})"></span>
+        <button role="tab" aria-selected="${snapMode === 'meals'}" data-snapmode="meals">Meals</button>
+        <button role="tab" aria-selected="${snapMode === 'progress'}" data-snapmode="progress">Progress</button>
       </div>
-      <label class="btn ink" for="snap-file" role="button" tabindex="0" style="--i:2">${svg('camera')}Take or choose a photo</label>
-      <input id="snap-file" type="file" accept="image/*" capture="environment" hidden>
-      <button class="btn glass" data-act="manual" style="--i:3">Enter manually</button>
-      <div class="card" style="--i:4">
+      ${snapMode === 'meals' ? mealsView() : progressView()}`;
+    const f1 = el.querySelector('#snap-file');
+    if (f1) f1.addEventListener('change', (e) => { const f = e.target.files && e.target.files[0]; if (!f) return; const rd = new FileReader(); rd.onload = () => { snapImg = rd.result; startSnap(); }; rd.readAsDataURL(f); e.target.value = ''; });
+    const f2 = el.querySelector('#progress-file');
+    if (f2) f2.addEventListener('change', (e) => { const f = e.target.files && e.target.files[0]; if (!f) return; const rd = new FileReader(); rd.onload = async () => { const img = await shrink(rd.result, 900); if (!img) return; const rec = { id: 'p' + Date.now(), date: Date.now(), img, weight: S.v.weight }; photos.progress.push(rec); await vault.put('progress', rec); celebrate('camera', 'var(--brand)', 'Progress photo saved', 'Kept inside BE, not your photo library'); renderSnap(); }; rd.readAsDataURL(f); e.target.value = ''; });
+    play(el, enter); count(el);
+  }
+  function mealsView() {
+    return `
+      <div class="card snap-card" style="--i:2">
+        <div class="lens"><div class="face ${snapPhase === 'busy' ? 'scan' : ''}">${snapImg ? `<img src="${snapImg}" alt="Your meal photo">` : svg('camera')}</div></div>
+        <div class="snap-title">${snapPhase === 'busy' ? 'Reading your plate…' : 'Point, shoot, done'}</div>
+        <p class="note snap-sub">BE estimates the foods, calories and macros. You check them before anything is saved.</p>
+        <div class="btn-row">
+          <label class="btn ink" for="snap-file" role="button" tabindex="0">${svg('camera')}Photo</label>
+          <button class="btn glass" data-act="manual">Type it</button>
+        </div>
+        <input id="snap-file" type="file" accept="image/*" capture="environment" hidden>
+      </div>
+      <div class="card" style="--i:3">
         <div class="lab">Today so far</div>
         <div class="totals">${['kcal', 'protein', 'carbs', 'fat'].map((k) => `<div><b>${N('snap-' + k, S.v[k])}</b><span>${k === 'kcal' ? 'kcal' : k[0].toUpperCase() + k.slice(1) + ' g'}</span></div>`).join('')}</div>
       </div>
-      <p class="note hint" style="--i:5">In this preview the estimate is a fixed example. The app sends a photo for analysis only after you agree.</p>`;
-    el.querySelector('#snap-file').addEventListener('change', (e) => {
-      const f = e.target.files && e.target.files[0]; if (!f) return;
-      const rd = new FileReader(); rd.onload = () => { snapImg = rd.result; startSnap(); }; rd.readAsDataURL(f);
-    });
-    play(el, enter); count(el);
+      ${calendarCard()}
+      <p class="note hint" style="--i:5">Meal photos are saved in BE's diary, never in your photo library. In this preview the estimate is a fixed example and photos stay in this browser.</p>`;
+  }
+  function calendarCard() {
+    const y = calMonth.getFullYear(), m = calMonth.getMonth();
+    const first = new Date(y, m, 1), lead = (first.getDay() + 6) % 7, n = new Date(y, m + 1, 0).getDate();
+    const todayKey = dayKey(new Date());
+    const byDay = {};
+    photos.meals.forEach((p) => { (byDay[dayKey(new Date(p.date))] ||= []).push(p); });
+    let cells = '';
+    for (let i = 0; i < lead; i++) cells += '<span class="cal-cell empty"></span>';
+    for (let d = 1; d <= n; d++) {
+      const key = dayKey(new Date(y, m, d)), mine = byDay[key] || [], sample = SAMPLE_MEALS[key] || [];
+      const count = mine.length + sample.length, last = mine[mine.length - 1];
+      const future = key > todayKey;
+      cells += `<button class="cal-cell ${key === todayKey ? 'today' : ''} ${last ? 'has-photo' : ''}" ${count ? `data-calday="${key}"` : 'disabled'} ${future ? 'aria-disabled="true"' : ''} aria-label="${d} ${first.toLocaleDateString('en-AU', { month: 'long' })}${count ? `, ${count} meal${count === 1 ? '' : 's'}` : ''}" style="${last ? `background-image:url(${last.img})` : ''}">
+        <span class="d">${d}</span>${count ? `<span class="c">${count}</span>` : ''}${!last && count ? '<i class="dot"></i>' : ''}</button>`;
+    }
+    return `<div class="card" style="--i:4;gap:12px">
+      <div class="ch">${svg('burger')}<span>Meal diary</span><span class="end cal-nav"><button data-cal="-1" aria-label="Previous month">‹</button><b>${first.toLocaleDateString('en-AU', { month: 'long', year: 'numeric' })}</b><button data-cal="1" aria-label="Next month">›</button></span></div>
+      <div class="cal-head">${['M', 'T', 'W', 'T', 'F', 'S', 'S'].map((x) => `<span>${x}</span>`).join('')}</div>
+      <div class="cal">${cells}</div>
+      <p class="note" style="font-size:12px">Days with a photo show your latest meal. Dots are meals logged without a photo. Tap a day to see its meals.</p>
+    </div>`;
+  }
+  function openDay(key) {
+    const mine = photos.meals.filter((p) => dayKey(new Date(p.date)) === key), sample = SAMPLE_MEALS[key] || [];
+    const [yy, mm, dd] = key.split('-').map(Number);
+    const title = new Date(yy, mm - 1, dd).toLocaleDateString('en-AU', { weekday: 'long', day: 'numeric', month: 'long' });
+    sheet(title, `
+      ${mine.map((p) => `<div class="block meal-entry">${p.img ? `<img src="${p.img}" alt="${esc(p.name)}">` : ''}
+        <div class="meal-meta"><b>${esc(p.name)}</b><span class="note">${new Date(p.date).toLocaleTimeString('en-AU', { hour: 'numeric', minute: '2-digit' })} · ${fmt(p.kcal)} kcal · P ${fmt(p.p)} g · C ${fmt(p.c)} g · F ${fmt(p.f)} g</span>
+        <button class="link-del" data-delmeal="${p.id}">Delete photo</button></div></div>`).join('')}
+      ${sample.map(([name, kcal]) => `<div class="block meal-entry"><div class="meal-meta"><b>${esc(name)}</b><span class="note">${fmt(kcal)} kcal · sample entry, no photo</span></div></div>`).join('')}
+      <p class="note">Saved inside BE. Nutrition from each meal is also in Apple Health.</p>`);
+  }
+  function progressView() {
+    const list = [...photos.progress].sort((a, b) => a.date - b.date);
+    const first = list[0], last = list[list.length - 1];
+    const fmtD = (t) => new Date(t).toLocaleDateString('en-AU', { day: 'numeric', month: 'short' });
+    const compare = list.length >= 2 ? `<div class="card" style="--i:3;gap:10px">
+        <div class="ch">${svg('sparkle')}<span>Then and now</span><span class="end note" style="font-weight:500">${Math.max(1, Math.round((last.date - first.date) / 86400000))} days</span></div>
+        <div class="compare"><figure><img src="${first.img}" alt="First progress photo"><figcaption>${fmtD(first.date)} · ${fmt(first.weight, 1)} kg</figcaption></figure>
+          <figure><img src="${last.img}" alt="Latest progress photo"><figcaption>${fmtD(last.date)} · ${fmt(last.weight, 1)} kg</figcaption></figure></div>
+        <p class="note" style="font-size:12.5px">${last.weight === first.weight ? 'Weight unchanged. Photos often show changes the scale misses.' : `${last.weight < first.weight ? 'Down' : 'Up'} ${fmt(Math.abs(last.weight - first.weight), 1)} kg since your first photo.`}</p>
+      </div>` : '';
+    return `
+      <div class="card snap-card" style="--i:2">
+        <div class="lens"><div class="face">${last ? `<img src="${last.img}" alt="Latest progress photo">` : `<svg viewBox="0 0 24 24" aria-hidden="true" style="width:64px;height:64px;color:var(--brand)"><circle cx="12" cy="6.5" r="3.2" fill="currentColor"/><path fill="currentColor" d="M6 21c0-5 1.8-9.5 6-9.5S18 16 18 21z"/></svg>`}</div></div>
+        <div class="snap-title">${last ? `Last photo ${fmtD(last.date)}` : 'Your first progress photo'}</div>
+        <p class="note snap-sub">Same spot, same light, once a week works best. Photos are saved inside BE and never added to your photo library.</p>
+        <label class="btn ink" for="progress-file" role="button" tabindex="0">${svg('camera')}Take progress photo</label>
+        <input id="progress-file" type="file" accept="image/*" capture="user" hidden>
+      </div>
+      ${compare}
+      ${list.length ? `<div class="card" style="--i:4;gap:10px"><div class="ch">${svg('photo')}<span>All photos</span><span class="end note" style="font-weight:500">${list.length}</span></div>
+        <div class="pgrid">${list.slice().reverse().map((p) => `<button class="pcell" data-progress="${p.id}" aria-label="Progress photo from ${fmtD(p.date)}" style="background-image:url(${p.img})"><span>${fmtD(p.date)}</span></button>`).join('')}</div></div>` : ''}
+      <p class="note hint" style="--i:5">In this preview, progress photos stay in this browser only. In the app they are stored in BE's protected storage on your iPhone.</p>`;
+  }
+  function openProgress(id) {
+    const p = photos.progress.find((x) => x.id === id); if (!p) return;
+    sheet(new Date(p.date).toLocaleDateString('en-AU', { weekday: 'long', day: 'numeric', month: 'long' }), `
+      <div class="block" style="padding:8px"><img src="${p.img}" alt="Progress photo" style="width:100%;border-radius:14px;display:block"></div>
+      <div class="block"><div style="display:flex;justify-content:space-between;font-weight:600"><span>Weight that day</span><span>${fmt(p.weight, 1)} kg</span></div></div>
+      <button class="btn glass" data-delprogress="${p.id}" style="color:var(--warn)">Delete photo</button>`);
   }
   function startSnap() {
     if (!consented) { openConsent(); return; }
@@ -706,6 +1103,59 @@ canvas.confetti { position: absolute; inset: 0; z-index: 25; pointer-events: non
       <text x="${W - R}" y="${(y(ref[0]) - 5).toFixed(1)}" text-anchor="end">${ref[1]}</text>
       ${days.map((d, i) => `<text x="${(L + i * bw + bw / 2).toFixed(1)}" y="${H - 5}" text-anchor="middle">${d.date.toLocaleDateString('en-AU', { weekday: 'narrow' })}</text>`).join('')}</svg>`;
   }
+  // ---------- Sync menu: devices, sources and Health profile ----------
+  const ago = (t) => { const s = Math.round((Date.now() - t) / 1000); return s < 10 ? 'just now' : s < 60 ? `${s} s ago` : s < 3600 ? `${Math.round(s / 60)} min ago` : `${Math.round(s / 3600)} h ago`; };
+  const t0 = Date.now();
+  const DEVICES = [
+    { name: 'Apple Watch', via: 'Paired to this iPhone', data: 'Heart rate, resting HR, HRV, blood oxygen, sleep, rings, workouts', icon: 'heart', color: 'var(--heart)', seen: t0 - 2 * 60000 },
+    { name: 'Fitbit Air', via: 'Through the Google Health app', data: 'Steps, heart rate, resting HR, sleep, exercise', icon: 'wave', color: 'var(--water)', seen: t0 - 14 * 60000 },
+    { name: 'iPhone', via: 'Built-in motion sensors', data: 'Steps, distance, flights climbed', icon: 'shoe', color: 'var(--act)', seen: t0 - 30000 },
+    { name: 'BE', via: 'What you log in BE', data: 'Water, meals and macros, weight', icon: 'drop', color: 'var(--brand)', seen: null },
+  ];
+  const SRC = {
+    steps: 'Apple Watch, Fitbit Air and iPhone. Apple Health merges them using your source order, so steps are not counted twice.',
+    water: 'Logged in BE and saved to Apple Health.', sleep: 'Apple Watch and Fitbit Air. Overlapping time is counted once.',
+    rhr: 'Apple Watch and Fitbit Air.', hrv: 'Apple Watch. Fitbit does not send HRV to Apple Health.', spo2: 'Apple Watch.',
+    vo2: 'Apple Watch, estimated during outdoor walks and runs.', weight: 'Logged in BE or by a connected scale.',
+    exercise: 'Apple Watch exercise minutes.', kcal: 'Meals logged in BE or other food apps that write to Apple Health.',
+  };
+  // Profile fields are HealthKit characteristics the person set in the Health app. BE reads, never stores.
+  const PROFILE = [['Age', '34'], ['Height', '178 cm'], ['Weight', null], ['Biological sex', ''], ['Blood type', ''], ['Wheelchair use', 'No'], ['Move goal', '600 kcal']];
+  let syncing = false;
+  function openMenu() {
+    layer.innerHTML = `<div class="menu-scrim" data-close="1"><div class="menu" role="dialog" aria-modal="true" aria-label="Apple Health">
+      <div class="row" style="align-items:flex-start">
+        <span class="ico" style="background:linear-gradient(150deg,var(--brand-2),var(--brand))">${svg('heart')}</span>
+        <div><div class="rt">Apple Health</div><div class="rs"><span class="dot"></span>Connected · synced <span id="m-ago">${ago(S.lastSync)}</span></div></div>
+      </div>
+      <button class="btn ink sm ${syncing ? 'spin' : ''}" data-act="sync" id="sync-btn">${svg('sync')}${syncing ? 'Syncing…' : 'Sync now'}</button>
+      <div class="lab" style="margin-top:2px">Devices and sources</div>
+      <div class="block" style="gap:10px;padding:12px">
+        ${DEVICES.map((d) => `<div class="row"><span class="ico" style="background:${d.color}">${svg(d.icon)}</span>
+          <div style="min-width:0"><div class="rt">${d.name}</div><div class="rs">${d.via}</div><div class="rs">${d.data}</div></div>
+          <span class="when">${d.seen ? ago(d.seen) : 'Writes'}</span></div>`).join('')}
+      </div>
+      <div class="lab" style="margin-top:2px">Profile from Apple Health</div>
+      <div class="block" style="padding:12px">
+        <dl class="kv">${PROFILE.map(([k, v]) => { const val = v === null ? `${fmt(S.v.weight, 1)} kg` : v; return `<dt>${k}</dt><dd class="${val ? '' : 'unset'}">${val || 'Not set'}</dd>`; }).join('')}</dl>
+      </div>
+      <p class="note">Read from Apple Health (HealthKit). There is no BE account: edit these in the Health app under your profile. To change which device wins when two overlap, use Health › Data Sources &amp; Access. Sample data in this preview.</p>
+    </div></div>`;
+    const b = document.getElementById('sync-btn'); if (b) b.focus();
+  }
+  function syncNow() {
+    if (syncing) return;
+    syncing = true; openMenu();
+    setTimeout(() => {
+      syncing = false;
+      S.v.steps += 40 + Math.floor(Math.random() * 80);
+      S.lastSync = Date.now(); DEVICES[0].seen = Date.now(); DEVICES[2].seen = Date.now(); DEVICES[1].seen = Date.now() - 60000;
+      renderAll(); openMenu();
+      celebrate('sync', 'var(--good)', 'Synced with Apple Health', 'Apple Watch, Fitbit Air and iPhone up to date');
+      const live = document.getElementById('live'); if (live) live.classList.add('ping');
+    }, 1300);
+  }
+
   function openDetail(k) {
     const m = M[k], c = coach(k), v = dayV()[k];
     sheet(m.full || m.name, `
@@ -718,6 +1168,7 @@ canvas.confetti { position: absolute; inset: 0; z-index: 25; pointer-events: non
         <div class="note" style="display:flex;gap:6px;align-items:center">${svg('sparkle', 'width="14" height="14"')}Personalised on device by Apple Intelligence</div>
       </div>
       <div class="block"><div class="lab">Last 7 days</div>${chart(k)}</div>
+      <div class="block"><div class="lab">Source</div><p class="p" style="font-size:14.5px">${esc(SRC[k] || 'Apple Health')}</p></div>
       ${T[k] ? `<div class="block"><div style="display:flex;justify-content:space-between;font-weight:600"><span>Daily target</span><span style="font-variant-numeric:tabular-nums">${fmt(T[k], m.d)} ${m.long || m.unit}</span></div><div class="note">${esc(reasons[k] || '')}</div></div>` : ''}
       <p class="note">BE gives general wellness information, not medical advice. If you're worried about your health, talk to your GP.</p>`);
   }
@@ -791,6 +1242,119 @@ canvas.confetti { position: absolute; inset: 0; z-index: 25; pointer-events: non
   }
 
   // ---------- Navigation ----------
+  // ---------- Ask coach ----------
+  // In the app: Apple Intelligence on device, or ChatGPT through BE's relay with consent.
+  // In this preview, answers come from Claude via the artifact's sample capability, using the sample data.
+  const ENGINE = { short: 'Apple Intelligence', note: 'In the app this runs on your iPhone with Apple Intelligence, or ChatGPT (with your consent) where Apple Intelligence isn’t available. In this preview, Claude answers using the sample data.' };
+  const SUGGEST = ['Why is my HRV low?', 'How did I sleep this week?', 'What should I eat today?', 'Am I ready to train hard?'];
+  let userName = 'Azad';
+  try { userName = localStorage.getItem('be.name') || userName; } catch (e) { /* storage unavailable */ }
+  const samplerP = (window.claude && typeof window.claude.use === 'function') ? window.claude.use('sample').catch(() => null) : Promise.resolve(null);
+  let aiOff = false; // set when the viewer declines or Claude is unavailable
+
+  function healthContext() {
+    const V = S.v, sc = scoreFor(V);
+    return JSON.stringify({
+      date: new Date().toISOString().slice(0, 10), name: userName,
+      profile: { age: 34, heightCm: 178, weightKg: V.weight, biologicalSex: 'not set in Apple Health' },
+      today: { steps: V.steps, waterL: V.water, sleepH: V.sleep, restingHR: V.rhr, hrvMs: V.hrv, spo2Pct: V.spo2, vo2max: V.vo2, exerciseMin: V.exercise, kcalEaten: V.kcal, proteinG: V.protein, carbsG: V.carbs, fatG: V.fat },
+      rings: S.rings, beScore: sc.score, normal90d: base, targets: T, streakDays: S.streak,
+      last7days: days.map((d) => ({ date: d.date.toISOString().slice(0, 10), steps: d.v.steps, sleepH: d.v.sleep, restingHR: d.v.rhr, hrvMs: d.v.hrv, waterL: d.v.water, kcal: d.v.kcal })),
+      sources: 'Apple Watch (heart, HRV, SpO2, sleep, rings), Fitbit Air via Google Health (steps, heart rate, sleep; no HRV), iPhone (steps), BE (water, meals, weight)',
+    });
+  }
+  const RULES = () => `You are BE's health coach inside a phone app, talking to ${userName}. Use Australian English. Be warm, brief and practical: 2-5 short sentences, or up to 4 short bullet lines starting with "• ". Plain text, no markdown, no headings. Ground every claim in the data below and quote the real numbers. Compare with their own 90-day normal, not population averages. You are not a doctor: never diagnose, never name medical conditions, never suggest medication or supplements. If something looks concerning or persists, suggest talking to a GP (000 in an emergency). If the data can't answer, say so plainly.\n\nHealth data (JSON):\n${healthContext()}`;
+
+  const chat = { turns: [], busy: false, ctl: null };
+  function localAnswer(q) {
+    const t = q.toLowerCase();
+    const pick = t.includes('sleep') ? 'sleep' : t.includes('hrv') || t.includes('variab') ? 'hrv' : t.includes('heart') ? 'rhr' : t.includes('water') || t.includes('drink') ? 'water'
+      : t.includes('eat') || t.includes('protein') || t.includes('food') || t.includes('calor') ? 'protein' : t.includes('step') || t.includes('walk') ? 'steps' : null;
+    if (pick) { const c = coach(pick); return `${c.mean} ${c.act}`; }
+    const g = greeting(); return `Your BE score is ${g.score}. ${g.why}`;
+  }
+  function openChat(first) {
+    layer.innerHTML = `<div class="scrim" data-close="1"><div class="sheet" role="dialog" aria-modal="true" aria-label="Ask your coach"><div class="grab"></div>
+      <div class="in chat">
+        <div class="sheet-top"><div style="display:flex;gap:10px;align-items:center"><span class="coach-orb" aria-hidden="true"></span><div><h2>Ask your coach</h2><div class="engine">${svg('sparkle')}Apple Intelligence · ChatGPT fallback</div></div></div>
+          <button class="x" data-close="1" aria-label="Close">${svg('x')}</button></div>
+        <div class="chat-log" id="chat-log" aria-live="polite"></div>
+        <div class="chips" id="chat-chips">${['Prepare my insights', ...SUGGEST].map((q) => `<button class="chip" data-ask="${esc(q)}">${esc(q)}</button>`).join('')}</div>
+        <form class="composer" id="composer"><textarea id="chat-in" rows="1" placeholder="Ask about your health…" aria-label="Your question"></textarea>
+          <button class="arrow" id="chat-send" type="submit" aria-label="Send">${svg('arrowUp')}</button></form>
+        <p class="note" style="font-size:11.5px">${esc(ENGINE.note)} General wellness information, not medical advice.</p>
+      </div></div></div>`;
+    const log = document.getElementById('chat-log');
+    if (!chat.turns.length) addBot(`Hi ${userName}. I can see your sleep, heart, activity and food data. Ask me anything, or tap “Prepare my insights”.`);
+    else chat.turns.forEach((t) => (t.role === 'user' ? addMe(t.content, false) : addBot(t.content, false)));
+    document.getElementById('composer').addEventListener('submit', (e) => { e.preventDefault(); if (chat.busy) { chat.ctl?.abort(); return; } const v = document.getElementById('chat-in').value.trim(); if (v) ask(v); });
+    document.getElementById('chat-in').addEventListener('keydown', (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); document.getElementById('composer').requestSubmit(); } });
+    if (first) ask(first); else document.getElementById('chat-in').focus();
+    log.scrollTop = log.scrollHeight;
+  }
+  const logEl = () => document.getElementById('chat-log');
+  function addMe(text) { const el = document.createElement('div'); el.className = 'msg me'; el.textContent = text; logEl().appendChild(el); logEl().scrollTop = 1e6; return el; }
+  function addBot(text) { const el = document.createElement('div'); el.className = 'msg bot'; el.textContent = text; logEl().appendChild(el); logEl().scrollTop = 1e6; return el; }
+  function setBusy(b) {
+    chat.busy = b; const btn = document.getElementById('chat-send');
+    if (btn) { btn.innerHTML = b ? svg('x') : svg('arrowUp'); btn.setAttribute('aria-label', b ? 'Stop' : 'Send'); }
+  }
+  async function ask(q) {
+    if (chat.busy || !logEl()) return;
+    const input = document.getElementById('chat-in'); if (input) input.value = '';
+    addMe(q);
+    if (q === 'Prepare my insights') return insights();
+    const bubble = addBot(''); bubble.innerHTML = '<span class="typing" aria-label="Coach is thinking"><i></i><i></i><i></i></span>';
+    chat.turns.push({ role: 'user', content: q });
+    const sample = aiOff ? null : await samplerP;
+    if (!sample) { const a = localAnswer(q); bubble.textContent = a; meta(bubble, 'Built-in coach (offline)'); chat.turns.push({ role: 'assistant', content: a }); return; }
+    setBusy(true); chat.ctl = new AbortController();
+    try {
+      const { text } = await sample([{ role: 'user', content: RULES() }, ...chat.turns.slice(-12)], { cache: false, signal: chat.ctl.signal, onText: ({ text }) => { bubble.textContent = text; logEl() && (logEl().scrollTop = 1e6); } });
+      bubble.textContent = text; chat.turns.push({ role: 'assistant', content: text }); meta(bubble, 'From your data · preview answer by Claude');
+    } catch (e) {
+      if (e.code === 'cancelled') { bubble.textContent = e.text || 'Stopped.'; }
+      else if (['not_granted', 'sampling_disabled', 'not_declared', 'capability_disabled', 'capability_removed'].includes(e.code)) { aiOff = true; const a = localAnswer(q); bubble.textContent = a; meta(bubble, 'Built-in coach (AI not allowed in this view)'); chat.turns.push({ role: 'assistant', content: a }); }
+      else if (e.code === 'rate_limited') { bubble.textContent = (e.text ? e.text + '\n\n' : '') + 'The coach is busy. Try again in a moment.'; }
+      else if (e.code === 'refused') { bubble.textContent = "I can't help with that one. Try asking about your sleep, heart, activity or food."; }
+      else { bubble.textContent = (e.text ? e.text + '\n\n' : '') + 'That answer was interrupted. Ask again to retry.'; }
+    } finally { setBusy(false); }
+  }
+  function meta(el, t) { const m = document.createElement('span'); m.className = 'meta'; m.textContent = t; el.appendChild(m); }
+  async function insights() {
+    const holder = document.createElement('div'); holder.className = 'msg bot'; holder.innerHTML = '<span class="typing" aria-label="Preparing insights"><i></i><i></i><i></i></span> Analysing your profile and the last 7 days…';
+    logEl().appendChild(holder); logEl().scrollTop = 1e6;
+    const sample = aiOff ? null : await samplerP;
+    let items = null, by = 'Built-in coach (offline)';
+    if (sample) {
+      setBusy(true); chat.ctl = new AbortController();
+      try {
+        const out = await sample.json(`${RULES()}\n\nTask: find the 3 most useful insights for today from this data, most important first. Reply with only a JSON array of exactly 3 objects: {"title": string of at most 6 words, "detail": one sentence that quotes the numbers, "action": one practical step for today}. Example: [{"title":"Short sleep is costing recovery","detail":"You slept 6.2 h against a 7.5 h target and your resting heart rate is 5 bpm above normal.","action":"Swap today's hard session for a 30-minute walk."}]`, { signal: chat.ctl.signal, cache: { gcTime: 300000 } });
+        if (Array.isArray(out)) items = out.filter((x) => x && x.title && x.detail).slice(0, 3);
+        by = 'From your data · preview insights by Claude';
+      } catch (e) { if (['not_granted', 'sampling_disabled', 'not_declared', 'capability_disabled', 'capability_removed'].includes(e.code)) aiOff = true; }
+      finally { setBusy(false); }
+    }
+    if (!items || !items.length) items = ['sleep', 'rhr', 'water'].map((k) => { const c = coach(k); return { title: c.h, detail: c.mean, action: c.act }; });
+    holder.remove();
+    const wrap = document.createElement('div'); wrap.className = 'insights';
+    items.forEach((it) => { const c = document.createElement('div'); c.className = 'insight';
+      const b = document.createElement('b'); b.textContent = String(it.title);
+      const p = document.createElement('p'); p.textContent = String(it.detail);
+      const d = document.createElement('div'); d.className = 'do'; const st = document.createElement('strong'); st.textContent = 'Today: '; d.append(st, String(it.action || ''));
+      c.append(b, p, d); wrap.appendChild(c); });
+    const m = document.createElement('span'); m.className = 'meta'; m.style.paddingLeft = '4px'; m.textContent = by; wrap.appendChild(m);
+    logEl().appendChild(wrap); logEl().scrollTop = 1e6;
+    chat.turns.push({ role: 'user', content: 'Prepare my insights' }, { role: 'assistant', content: items.map((i) => `${i.title}: ${i.detail} Today: ${i.action}`).join('\n') });
+  }
+  function editName() {
+    sheet('Your name', `<div class="block"><label class="lab" for="name-in">What should BE call you?</label>
+      <input id="name-in" class="meal-name" value="${esc(userName)}" maxlength="30" autocomplete="given-name"></div>
+      <p class="note">Kept on this device only. BE has no account, and Apple Health doesn't share names with apps.</p>
+      <button class="btn ink" data-act="save-name">Save</button>`);
+    setTimeout(() => { const i = document.getElementById('name-in'); if (i) { i.focus(); i.select(); } }, 60);
+  }
+
   let current = 'today';
   function renderAll(enterView) {
     renderToday(enterView === 'today'); renderStreaks(enterView === 'streaks'); renderPlan(enterView === 'plan');
@@ -820,8 +1384,15 @@ canvas.confetti { position: absolute; inset: 0; z-index: 25; pointer-events: non
   }
 
   document.addEventListener('click', (e) => {
-    const el = e.target.closest('[data-water],[data-day],[data-metric],[data-tab],[data-tab-go],[data-habit],[data-step],[data-act],[data-close]');
+    const el = e.target.closest('[data-ask],[data-snapmode],[data-cal],[data-calday],[data-progress],[data-delmeal],[data-delprogress],[data-water],[data-day],[data-metric],[data-tab],[data-tab-go],[data-habit],[data-step],[data-act],[data-close]');
     if (!el) return;
+    if (el.dataset.ask) { if (logEl()) ask(el.dataset.ask); else openChat(el.dataset.ask); return; }
+    if (el.dataset.snapmode) { snapMode = el.dataset.snapmode; renderSnap(true); return; }
+    if (el.dataset.cal) { calMonth.setMonth(calMonth.getMonth() + Number(el.dataset.cal)); renderSnap(); return; }
+    if (el.dataset.calday) return openDay(el.dataset.calday);
+    if (el.dataset.progress) return openProgress(el.dataset.progress);
+    if (el.dataset.delmeal) { const id = el.dataset.delmeal; const m = photos.meals.find((x) => x.id === id); if (m) { m.img = null; vault.put('meals', m); } closeSheet(); renderSnap(); return; }
+    if (el.dataset.delprogress) { const id = el.dataset.delprogress; photos.progress = photos.progress.filter((x) => x.id !== id); vault.del('progress', id); closeSheet(); renderSnap(); return; }
     if (el.dataset.close !== undefined) { if (e.target === el || el.tagName === 'BUTTON') closeSheet(); return; }
     if (el.dataset.water) {
       S.v.water = Math.round((S.v.water + Number(el.dataset.water)) * 100) / 100; S.justAdded = true; evaluate(); return;
@@ -837,6 +1408,11 @@ canvas.confetti { position: absolute; inset: 0; z-index: 25; pointer-events: non
     }
     const a = el.dataset.act;
     if (a === 'launch') launch();
+    if (a === 'menu') openMenu();
+    if (a === 'ask') openChat();
+    if (a === 'name') editName();
+    if (a === 'save-name') { const v = (document.getElementById('name-in')?.value || '').trim().slice(0, 30); if (v) { userName = v; try { localStorage.setItem('be.name', v); } catch (e) { /* storage unavailable */ } } closeSheet(); renderToday(false); }
+    if (a === 'sync') syncNow();
     if (a === 'manual') openReview({ name: 'Meal', items: [{ name: '', kcal: 0, p: 0, c: 0, f: 0, flag: false }] }, false);
     if (a === 'consent-yes') { consented = true; closeSheet(); if (snapImg) setTimeout(startSnap, 250); }
     if (a === 'suggest') sheet('Suggested plan', `
@@ -850,7 +1426,10 @@ canvas.confetti { position: absolute; inset: 0; z-index: 25; pointer-events: non
       S.v.kcal += Math.round(rsum('kcal')); S.v.protein += Math.round(rsum('p')); S.v.carbs += Math.round(rsum('c')); S.v.fat += Math.round(rsum('f'));
       if (reviewPhoto) S.photoLogs++;
       S.xp += 5; celebrate('burger', 'var(--cal)', '+5 XP', `${review.name || 'Meal'} logged`);
-      review = null; snapImg = null; closeSheet(); evaluate();
+      const entry = { id: 'm' + Date.now(), date: Date.now(), name: review.name || 'Meal', kcal: Math.round(rsum('kcal')), p: Math.round(rsum('p')), c: Math.round(rsum('c')), f: Math.round(rsum('f')), img: null };
+      const src = reviewPhoto ? snapImg : null;
+      review = null; snapImg = null; closeSheet();
+      (src ? shrink(src) : Promise.resolve(null)).then((img) => { entry.img = img; photos.meals.push(entry); vault.put('meals', entry); evaluate(); });
     }
   });
   document.addEventListener('keydown', (e) => {
@@ -873,6 +1452,7 @@ canvas.confetti { position: absolute; inset: 0; z-index: 25; pointer-events: non
     S.v.steps += 30 + Math.floor(Math.random() * 60);
     if (Math.random() < 0.3 && S.rings.ex < S.rings.exGoal + 10) { S.rings.ex++; S.v.exercise++; }
     S.rings.move = Math.min(S.rings.move + 2, 900);
+    S.lastSync = Date.now();
     const sc = document.getElementById('screen').scrollTop;
     evaluate();
     document.getElementById('screen').scrollTop = sc;
@@ -881,5 +1461,6 @@ canvas.confetti { position: absolute; inset: 0; z-index: 25; pointer-events: non
 
   renderAll('today');
   requestAnimationFrame(moveIndicator);
+  requestAnimationFrame(drawEcg);
 })();
 </script>
