@@ -1,0 +1,111 @@
+# XcodeGen spec. On a Mac: `brew install xcodegen && xcodegen generate`, then open BE.xcodeproj.
+# Before building, set DEVELOPMENT_TEAM and replace com.example / group.com.example.be with your own ids.
+name: BE
+options:
+  bundleIdPrefix: com.example
+  deploymentTarget:
+    iOS: "26.0"
+    watchOS: "26.0"
+  createIntermediateGroups: true
+
+settings:
+  base:
+    SWIFT_VERSION: "5.0"
+    DEVELOPMENT_TEAM: ""
+    MARKETING_VERSION: "0.1.0"
+    CURRENT_PROJECT_VERSION: "1"
+    BE_APP_GROUP: group.com.example.be
+    # Base URL of the BE relay (not built yet). Leave empty until it's deployed;
+    # photo estimates then show a clear "not set up" message. Never put API keys here.
+    BE_RELAY_URL: ""
+
+packages:
+  BECore:
+    path: Packages/BECore
+
+targets:
+  BE:
+    type: application
+    platform: iOS
+    sources:
+      - BE
+      - Shared
+    dependencies:
+      - package: BECore
+      - target: BEWidgets
+      - target: BEWatch
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.example.be
+        TARGETED_DEVICE_FAMILY: "1"
+    info:
+      path: BE/Info.plist
+      properties:
+        CFBundleDisplayName: BE
+        UILaunchScreen: {}
+        UISupportedInterfaceOrientations: [UIInterfaceOrientationPortrait]
+        NSHealthShareUsageDescription: BE reads your activity, heart, sleep, body and nutrition data from Apple Health to show your overview, explain your vitals and track your plan.
+        NSHealthUpdateUsageDescription: BE saves the water, meals and weight you log in BE to Apple Health.
+        NSCameraUsageDescription: BE uses the camera to photograph meals so it can estimate their calories and macros.
+        BEAppGroup: $(BE_APP_GROUP)
+        BERelayURL: $(BE_RELAY_URL)
+    entitlements:
+      path: BE/BE.entitlements
+      properties:
+        com.apple.developer.healthkit: true
+        com.apple.developer.healthkit.access: []
+        com.apple.developer.healthkit.background-delivery: true
+        com.apple.security.application-groups: [$(BE_APP_GROUP)]
+        com.apple.developer.devicecheck.appattest-environment: development
+
+  BEWidgets:
+    type: app-extension
+    platform: iOS
+    sources:
+      - BEWidgets
+      - Shared
+    dependencies:
+      - package: BECore
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.example.be.widgets
+    info:
+      path: BEWidgets/Info.plist
+      properties:
+        CFBundleDisplayName: BE
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.widgetkit-extension
+        NSHealthShareUsageDescription: BE widgets show today's health data from Apple Health.
+        NSHealthUpdateUsageDescription: The water button saves water to Apple Health.
+        BEAppGroup: $(BE_APP_GROUP)
+    entitlements:
+      path: BEWidgets/BEWidgets.entitlements
+      properties:
+        com.apple.developer.healthkit: true
+        com.apple.developer.healthkit.access: []
+        com.apple.security.application-groups: [$(BE_APP_GROUP)]
+
+  BEWatch:
+    type: application
+    platform: watchOS
+    sources:
+      - BEWatch
+    dependencies:
+      - package: BECore
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.example.be.watchkitapp
+    info:
+      path: BEWatch/Info.plist
+      properties:
+        CFBundleDisplayName: BE
+        WKApplication: true
+        WKCompanionAppBundleIdentifier: com.example.be
+
+schemes:
+  BE:
+    build:
+      targets:
+        BE: all
+    run:
+      config: Debug
