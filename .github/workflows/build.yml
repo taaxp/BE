@@ -1,0 +1,56 @@
+# Builds and tests BE on every push. The iOS job compiles the app for the simulator without
+# signing, so it needs no Apple account; TestFlight delivery is a separate, signed workflow.
+name: Build
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  core:
+    name: BECore tests (Swift)
+    runs-on: ubuntu-latest
+    container: swift:6.2
+    steps:
+      - uses: actions/checkout@v4
+      - run: swift test --package-path Packages/BECore
+
+  web:
+    name: Web parser and analytics tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: python3 web/test/make_fixture.py "$RUNNER_TEMP/fixture.zip"
+      - run: node web/test/parser.test.mjs "$RUNNER_TEMP/fixture.zip"
+      - run: node web/test/analytics.test.mjs "$RUNNER_TEMP/fixture.zip"
+
+  ios:
+    name: iOS app (simulator build)
+    runs-on: macos-26
+    steps:
+      - uses: actions/checkout@v4
+      - name: Select the newest Xcode 26
+        run: |
+          XCODE=$(ls -d /Applications/Xcode_26*.app | sort -V | tail -1)
+          sudo xcode-select -s "$XCODE"
+          xcodebuild -version
+      - name: Generate the Xcode project
+        run: |
+          brew install xcodegen
+          xcodegen generate
+      - name: Build
+        run: |
+          set -o pipefail
+          xcodebuild -project BE.xcodeproj -scheme BE \
+            -destination 'generic/platform=iOS Simulator' \
+            -configuration Debug CODE_SIGNING_ALLOWED=NO build 2>&1 | tee build.log
+      - name: Keep the build log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-build-log
+          path: build.log
