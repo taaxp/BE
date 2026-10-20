@@ -1,0 +1,38 @@
+<title>BE</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/*__STYLE__*/
+</style>
+
+<div class="stage">
+  <p class="caption">BE for the web. It reads your Apple Health export on this device and shows only your real data. Nothing is uploaded.</p>
+  <div class="phone" id="phone">
+    <div class="sky" aria-hidden="true"></div>
+    <main class="screen" id="screen">
+      <section class="view" id="v-today" aria-label="Today" tabindex="-1"></section>
+      <section class="view" id="v-snap" aria-label="Snap" tabindex="-1" hidden></section>
+      <section class="view" id="v-streaks" aria-label="Streaks" tabindex="-1" hidden></section>
+      <section class="view" id="v-plan" aria-label="Plan" tabindex="-1" hidden></section>
+    </main>
+    <nav class="tabbar" role="tablist" aria-label="Sections">
+      <span class="indicator" id="indicator" aria-hidden="true"></span>
+      <button class="tab" role="tab" data-tab="today" aria-selected="true" aria-label="Today"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M4 10.5L12 4l8 6.5V19a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 19z"/><path d="M9.5 15.5c1.4 1.3 3.6 1.3 5 0" stroke-linecap="round"/></svg></button>
+      <button class="tab" role="tab" data-tab="snap" aria-selected="false" aria-label="Snap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M8.5 6l1.3-2h4.4l1.3 2H19a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2z"/><circle cx="12" cy="13" r="3.8"/></svg></button>
+      <button class="tab" role="tab" data-tab="streaks" aria-selected="false" aria-label="Streaks"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M12 3c1.2 3.3 5 5.4 5 10a5 5 0 0 1-10 0c0-2.2 1.2-3.6 2.3-4.6 0 2 1 3.2 2.2 3.2-.5-3.4-.7-5.8.5-8.6z"/></svg></button>
+      <button class="tab" role="tab" data-tab="plan" aria-selected="false" aria-label="Plan"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="1" fill="currentColor"/></svg></button>
+    </nav>
+  </div>
+</div>
+<dialog id="sheet" class="sheet" closedby="any" aria-labelledby="sheet-title"></dialog>
+
+<script>
+/*__PARSER__*/
+</script>
+<script>
+/*__ANALYTICS__*/
+</script>
+<script>
+const LOGO = 'data:image/png;base64,__LOGO__';
+const PARSER_SRC = /*__PARSER_SRC__*/;
+/*__APP__*/
+</script>
