@@ -30,7 +30,9 @@ jobs:
 
   ios:
     name: iOS app (simulator build)
-    runs-on: macos-26
+    # Intel runner: GitHub has been short of Apple Silicon macOS runners, and jobs on
+    # macos-26 were cancelled before starting.
+    runs-on: macos-26-intel
     steps:
       - uses: actions/checkout@v4
       - name: Select the newest Xcode 26

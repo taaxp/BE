@@ -12,7 +12,9 @@ permissions:
   contents: read
 jobs:
   upload:
-    runs-on: macos-26
+    # Intel runner: GitHub has been short of Apple Silicon macOS runners, and jobs on
+    # macos-26 were cancelled before starting.
+    runs-on: macos-26-intel
     env:
       ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
       ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
