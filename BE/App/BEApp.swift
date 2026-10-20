@@ -3,7 +3,8 @@ import BECore
 
 @main
 struct BEApp: App {
-    @State private var model = AppModel()
+    @UIApplicationDelegateAdaptor(AppDelegate.self) private var delegate
+    private var model: AppModel { delegate.model }
     @Environment(\.scenePhase) private var scenePhase
 
     var body: some Scene {
@@ -17,6 +18,19 @@ struct BEApp: App {
                     if phase == .active, model.state.onboardingComplete { Task { await model.refreshAll() } }
                 }
         }
+    }
+}
+
+/// Owns the model so the Health observers start at launch, including background
+/// launches from HealthKit, when no window or SwiftUI view is created.
+@MainActor
+final class AppDelegate: NSObject, UIApplicationDelegate {
+    let model = AppModel()
+
+    func application(_ application: UIApplication,
+                     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil) -> Bool {
+        model.startObserving()
+        return true
     }
 }
 

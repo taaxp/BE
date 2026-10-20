@@ -47,9 +47,19 @@ final class AppModel {
 
     func start() async {
         guard state.onboardingComplete else { return }
+        startObserving()
         await refreshAll()
+    }
+
+    /// Registers the Health observers. Runs at launch, before any screen exists,
+    /// because when HealthKit wakes BE in the background to deliver new data it
+    /// only reaches observers that were registered during launch.
+    private var observing = false
+    func startObserving() {
+        guard state.onboardingComplete, !observing else { return }
+        observing = true
         health.observe(MetricKind.allCases) { [weak self] metric in
-            Task { @MainActor in self?.scheduleRefresh(metric) }
+            await self?.healthChanged(metric)
         }
         PhoneSession.shared.onLogWater = { [weak self] liters in
             Task { @MainActor in await self?.logWater(liters: liters) }
@@ -74,16 +84,17 @@ final class AppModel {
     }
 
     /// Health observers can fire in bursts (a watch sync writes many samples),
-    /// so refreshes are coalesced over half a second.
+    /// so changes within half a second share one refresh. Returns once that
+    /// refresh has finished and the widgets have been told, so HealthKit keeps
+    /// BE awake in the background until the work is done.
     private var pendingMetrics = Set<MetricKind>()
-    private func scheduleRefresh(_ metric: MetricKind) {
+    private func healthChanged(_ metric: MetricKind) async {
         pendingMetrics.insert(metric)
-        refreshTask?.cancel()
-        refreshTask = Task {
+        let task = refreshTask ?? Task {
             try? await Task.sleep(for: .milliseconds(500))
-            guard !Task.isCancelled else { return }
             let metrics = pendingMetrics
             pendingMetrics.removeAll()
+            refreshTask = nil
             for m in metrics {
                 let values = (try? await health.daily(m, days: 120)) ?? []
                 apply(m, values)
@@ -93,6 +104,8 @@ final class AppModel {
             }
             afterHealthChange()
         }
+        refreshTask = task
+        await task.value
     }
 
     private func apply(_ metric: MetricKind, _ values: [DailyValue]) {

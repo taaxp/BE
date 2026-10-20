@@ -1,8 +1,8 @@
 # XcodeGen spec. On a Mac: `brew install xcodegen && xcodegen generate`, then open BE.xcodeproj.
-# Before building, set DEVELOPMENT_TEAM and replace com.example / group.com.example.be with your own ids.
+# Bundle ids come from BE_BUNDLE_PREFIX and the team from DEVELOPMENT_TEAM. Set both in Xcode, or
+# pass them to xcodebuild (the TestFlight workflow does this from repository variables and secrets).
 name: BE
 options:
-  bundleIdPrefix: com.example
   deploymentTarget:
     iOS: "26.0"
     watchOS: "26.0"
@@ -12,9 +12,10 @@ settings:
   base:
     SWIFT_VERSION: "5.0"
     DEVELOPMENT_TEAM: ""
+    BE_BUNDLE_PREFIX: com.example
     MARKETING_VERSION: "0.1.0"
     CURRENT_PROJECT_VERSION: "1"
-    BE_APP_GROUP: group.com.example.be
+    BE_APP_GROUP: group.$(BE_BUNDLE_PREFIX).be
     # Base URL of the BE relay (not built yet). Leave empty until it's deployed;
     # photo estimates then show a clear "not set up" message. Never put API keys here.
     BE_RELAY_URL: ""
@@ -36,12 +37,15 @@ targets:
       - target: BEWatch
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.example.be
+        PRODUCT_BUNDLE_IDENTIFIER: $(BE_BUNDLE_PREFIX).be
         TARGETED_DEVICE_FAMILY: "1"
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
     info:
       path: BE/Info.plist
       properties:
         CFBundleDisplayName: BE
+        # BE only uses the system's HTTPS, which is exempt from export documentation.
+        ITSAppUsesNonExemptEncryption: false
         UILaunchScreen: {}
         UISupportedInterfaceOrientations: [UIInterfaceOrientationPortrait]
         NSHealthShareUsageDescription: BE reads your activity, heart, sleep, body and nutrition data from Apple Health to show your overview, explain your vitals and track your plan.
@@ -68,7 +72,7 @@ targets:
       - package: BECore
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.example.be.widgets
+        PRODUCT_BUNDLE_IDENTIFIER: $(BE_BUNDLE_PREFIX).be.widgets
     info:
       path: BEWidgets/Info.plist
       properties:
@@ -94,13 +98,13 @@ targets:
       - package: BECore
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.example.be.watchkitapp
+        PRODUCT_BUNDLE_IDENTIFIER: $(BE_BUNDLE_PREFIX).be.watchkitapp
     info:
       path: BEWatch/Info.plist
       properties:
         CFBundleDisplayName: BE
         WKApplication: true
-        WKCompanionAppBundleIdentifier: com.example.be
+        WKCompanionAppBundleIdentifier: $(BE_BUNDLE_PREFIX).be
 
 schemes:
   BE:

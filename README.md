@@ -31,7 +31,7 @@ xcodegen generate
 open BE.xcodeproj
 ```
 
-1. In `project.yml`, set `DEVELOPMENT_TEAM` and replace `com.example` and `group.com.example.be` with your own bundle ids and App Group, then run `xcodegen generate` again.
+1. In `project.yml`, set `DEVELOPMENT_TEAM` to your team id and `BE_BUNDLE_PREFIX` to a reverse-domain prefix you own (bundle ids and the App Group are derived from it), then run `xcodegen generate` again.
 2. HealthKit needs a real iPhone for meaningful data. The Simulator works for UI, using sample data added in its Health app.
 3. Core tests: `cd Packages/BECore && swift test`.
 

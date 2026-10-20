@@ -192,16 +192,22 @@ final class HealthStore: @unchecked Sendable {
 
     /// Calls `onChange` whenever Apple Health receives new data of a type BE
     /// shows, including writes from other apps, the watch and Google Health.
-    func observe(_ metrics: [MetricKind], onChange: @escaping @Sendable (MetricKind) -> Void) {
+    /// HealthKit is told the update was handled only after `onChange` returns.
+    func observe(_ metrics: [MetricKind], onChange: @escaping @Sendable (MetricKind) async -> Void) {
         stopObserving()
         for metric in metrics {
             let query = HKObserverQuery(sampleType: metric.sampleType, predicate: nil) { _, completion, error in
-                if error == nil { onChange(metric) }
-                completion()
+                guard error == nil else { completion(); return }
+                Task {
+                    await onChange(metric)
+                    completion()
+                }
             }
             store.execute(query)
             observers.append(query)
-            // Wakes BE in the background so widgets stay current.
+            // Lets HealthKit wake BE in the background when this type changes, so
+            // widgets stay current. HealthKit decides the real cadence per type
+            // (some types, steps among them, at most hourly).
             store.enableBackgroundDelivery(for: metric.sampleType, frequency: .immediate) { _, _ in }
         }
     }
