@@ -25,7 +25,7 @@ struct GreetingCard: View {
                     Text("\(g.score)").font(.metric(.title3)).contentTransition(.numericText())
                 }
                 .frame(width: 62, height: 62)
-                (Text("BE score \(g.score). ").bold() + Text(g.reason).foregroundStyle(.secondary))
+                Text("\(Text("BE score \(g.score). ").bold())\(Text(g.reason).foregroundStyle(.secondary))")
                     .font(.subheadline)
                     .fixedSize(horizontal: false, vertical: true)
             }
@@ -170,7 +170,7 @@ struct AskCoachView: View {
                         VStack(alignment: .leading, spacing: 4) {
                             Text(i.title).font(.headline)
                             Text(i.detail).font(.subheadline)
-                            (Text("Today: ").bold().foregroundStyle(Theme.brand) + Text(i.action)).font(.footnote)
+                            Text("\(Text("Today: ").bold().foregroundStyle(Theme.brand))\(i.action)").font(.footnote)
                         }
                         .padding(12)
                         .frame(maxWidth: .infinity, alignment: .leading)
